@@ -50,6 +50,43 @@ private:
 };
 
 //==========================================================================
+//-----------------Source and functions for bulk viscosity------------------------
+void alpha_funcs_source_bulk(double l, double Omega, double xi, double theta, 
+ double n, double brel, double lambda, double nu, double &alpha_4, double &alpha_7);
+
+void beta_funcs_and_ders_source_bulk(double l, double Omega, double xi, double theta, 
+ double n, double brel, double lambda, double nu, 
+double &beta_4, double &beta_7,
+double &beta_der_4, double &beta_der_7);
+
+void alpha_H2_W_V_vals_source_bulk(double l, double Omega, double xi,
+double theta, 
+double n, double brel, 
+double gamma_0,
+double lambda, double nu,
+double &alphaH_4, double &alphaH_7, double &alphaH_8, 
+double &alphaW_4, double &alphaW_7,  
+double &alphaV_4, double &alphaV_7, double &alphaV_8 );
+
+//======================================================================================================
+double S_Omega_bulk(double Omega, double xi,
+double theta, 
+double n, double brel, 
+double gamma_0,
+double lambda, double nu,
+double fzeta,
+double H0,
+double V,
+double W
+);
+
+
+
+
+
+
+
+
 
 
 

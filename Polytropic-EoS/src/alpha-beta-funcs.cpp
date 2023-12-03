@@ -191,3 +191,129 @@ void RHS_PF_SOURCELESS::operator()(const std::vector<double> &y , std::vector<do
     get_dydx(r, y, dydt);
 }
 //---------------------------------------------------
+//==========================================================================
+//-----------------Source and functions for bulk viscosity------------------------
+void alpha_funcs_source_bulk(double l, double Omega, double xi, double theta, 
+ double n, double brel, double lambda, double nu, double &alpha_4, double &alpha_7)
+{
+
+double nu_der_1 = (-1 + pow(E,lambda) + 2*pow(brel,2)*pow(E,lambda)*pow(xi,2)*pow(theta,1 + n) + 2*pow(brel,2)*pow(E,lambda)*n*pow(xi,2)*pow(theta,1 + n))/xi;
+
+double denom = 
+pow(E,nu)*(pow(E,lambda + nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3)) + 4*brel*(1 + n)*pow(xi,2)*pow(Omega,2) - 4*brel*pow(E,lambda)*(-1 + l + pow(l,2))*(1 + n)*pow(xi,2)*pow(Omega,2) - 4*brel*(1 + n)*nu_der_1*pow(xi,3)*pow(Omega,2) + brel*(1 + n)*pow(nu_der_1,2)*pow(xi,4)*pow(Omega,2) + 4*pow(brel,2)*pow(E,lambda - nu)*pow(1 + n,2)*pow(xi,4)*pow(Omega,4))
+;
+//----------------------
+ //----------------------
+double alpha_val_4 = 16*pow(E,nu)*Pi*(pow(E,nu)*l*(1 + l) - 2*brel*(1 + n)*pow(xi,2)*pow(Omega,2));
+alpha_4=alpha_val_4/denom ;
+//----------------------
+double alpha_val_7 = -16*pow(E,lambda + nu)*Pi*(pow(E,nu)*l*(1 + l) - 2*brel*(1 + n)*pow(xi,2)*pow(Omega,2));
+alpha_7=alpha_val_7/denom ;
+//----------------------
+}
+
+void beta_funcs_and_ders_source_bulk(double l, double Omega, double xi, double theta, 
+ double n, double brel, double lambda, double nu, 
+double &beta_4, double &beta_7,
+double &beta_der_4, double &beta_der_7)
+{
+//-----------------------------------------------
+double theta_der_1 = -0.5*((1 + brel*theta)*(-1 + pow(E,lambda) + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*pow(xi,2)*pow(theta,1 + n)))/(brel*(1 + n)*xi);
+
+double lambda_der_1 = (1 - pow(E,lambda) + 2*brel*pow(E,lambda)*pow(xi,2)*pow(theta,n) + 2*brel*pow(E,lambda)*n*pow(xi,2)*pow(theta,n))/xi;
+
+double nu_der_1 = (-1 + pow(E,lambda) + 2*pow(brel,2)*pow(E,lambda)*pow(xi,2)*pow(theta,1 + n) + 2*pow(brel,2)*pow(E,lambda)*n*pow(xi,2)*pow(theta,1 + n))/xi;
+
+
+double nu_der_2 = pow(xi,-2) - pow(E,2*lambda)/pow(xi,2) + brel*pow(E,lambda)*(1 + pow(E,lambda))*(1 + n)*pow(theta,n) - pow(brel,2)*pow(E,lambda)*(-5 + 3*pow(E,lambda))*(1 + n)*pow(theta,1 + n) + 2*pow(brel,3)*pow(E,2*lambda)*pow(1 + n,2)*pow(xi,2)*pow(theta,1 + 2*n) - 2*pow(brel,4)*pow(E,2*lambda)*pow(1 + n,2)*pow(xi,2)*pow(theta,2 + 2*n)
+; 
+//-----------------------------
+double denom = pow(E,nu)*xi*(pow(E,lambda + nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3)) + 4*brel*(1 + n)*pow(xi,2)*pow(Omega,2) - 4*brel*pow(E,lambda)*(-1 + l + pow(l,2))*(1 + n)*pow(xi,2)*pow(Omega,2) - 4*brel*(1 + n)*nu_der_1*pow(xi,3)*pow(Omega,2) + brel*(1 + n)*pow(nu_der_1,2)*pow(xi,4)*pow(Omega,2) + 4*pow(brel,2)*pow(E,lambda - nu)*pow(1 + n,2)*pow(xi,4)*pow(Omega,4));
+
+double denom_der = pow(E,nu)*(pow(E,lambda + nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3)) + pow(E,lambda + nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3))*nu_der_1*xi + pow(E,lambda + nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3))*(lambda_der_1 + nu_der_1)*xi + 12*brel*(1 + n)*pow(xi,2)*pow(Omega,2) - 12*brel*pow(E,lambda)*(-1 + l + pow(l,2))*(1 + n)*pow(xi,2)*pow(Omega,2) - 4*brel*pow(E,lambda)*(-1 + l + pow(l,2))*lambda_der_1*(1 + n)*pow(xi,3)*pow(Omega,2) - 12*brel*(1 + n)*nu_der_1*pow(xi,3)*pow(Omega,2) - 4*brel*pow(E,lambda)*(-1 + l + pow(l,2))*(1 + n)*nu_der_1*pow(xi,3)*pow(Omega,2) + brel*(1 + n)*pow(nu_der_1,2)*pow(xi,4)*pow(Omega,2) - 4*brel*(1 + n)*nu_der_2*pow(xi,4)*pow(Omega,2) + brel*(1 + n)*pow(nu_der_1,3)*pow(xi,5)*pow(Omega,2) + 2*brel*(1 + n)*nu_der_1*nu_der_2*pow(xi,5)*pow(Omega,2) + 20*pow(brel,2)*pow(E,lambda - nu)*pow(1 + n,2)*pow(xi,4)*pow(Omega,4) + 4*pow(brel,2)*pow(E,lambda - nu)*pow(1 + n,2)*(lambda_der_1 - nu_der_1)*pow(xi,5)*pow(Omega,4) + 4*pow(brel,2)*pow(E,lambda - nu)*pow(1 + n,2)*nu_der_1*pow(xi,5)*pow(Omega,4))
+;
+//----------------------
+//----------------------
+double beta_val_4 = -16*pow(E,nu)*Pi*(pow(E,nu)*pow(l,2)*(1 + l) + brel*pow(E,lambda)*(1 + n)*pow(xi,2)*pow(Omega,2) - brel*(3 + 2*l)*(1 + n)*pow(xi,2)*pow(Omega,2) + 2*pow(brel,3)*pow(E,lambda)*pow(1 + n,2)*pow(xi,4)*pow(Omega,2)*pow(theta,1 + n));
+beta_4=beta_val_4/denom ;
+//----------------------
+double beta_val_7 = 16*pow(E,lambda + nu)*Pi*(pow(E,nu)*pow(l,2)*(1 + l) + brel*pow(E,lambda)*(1 + n)*pow(xi,2)*pow(Omega,2) - brel*(3 + 2*l)*(1 + n)*pow(xi,2)*pow(Omega,2) + 2*pow(brel,3)*pow(E,lambda)*pow(1 + n,2)*pow(xi,4)*pow(Omega,2)*pow(theta,1 + n));
+beta_7=beta_val_7/denom ;
+//----------------------   
+
+//----------------------
+double beta_val_der_4 = 16*pow(E,nu)*Pi*(-2*pow(E,nu)*pow(l,2)*(1 + l)*nu_der_1 - 2*brel*pow(E,lambda)*(1 + n)*xi*pow(Omega,2) + 2*brel*(3 + 2*l)*(1 + n)*xi*pow(Omega,2) - brel*pow(E,lambda)*lambda_der_1*(1 + n)*pow(xi,2)*pow(Omega,2) - brel*pow(E,lambda)*(1 + n)*nu_der_1*pow(xi,2)*pow(Omega,2) + brel*(3 + 2*l)*(1 + n)*nu_der_1*pow(xi,2)*pow(Omega,2) - 2*pow(brel,3)*pow(E,lambda)*pow(1 + n,3)*theta_der_1*pow(xi,4)*pow(Omega,2)*pow(theta,n) - 8*pow(brel,3)*pow(E,lambda)*pow(1 + n,2)*pow(xi,3)*pow(Omega,2)*pow(theta,1 + n) - 2*pow(brel,3)*pow(E,lambda)*lambda_der_1*pow(1 + n,2)*pow(xi,4)*pow(Omega,2)*pow(theta,1 + n) - 2*pow(brel,3)*pow(E,lambda)*pow(1 + n,2)*nu_der_1*pow(xi,4)*pow(Omega,2)*pow(theta,1 + n));
+beta_der_4=beta_val_der_4/denom - (denom_der/(denom*denom))*beta_val_4 ; 
+//----------------------
+double beta_val_der_7 = 16*pow(E,lambda + nu)*Pi*(pow(E,nu)*pow(l,2)*(1 + l)*nu_der_1 + 2*brel*pow(E,lambda)*(1 + n)*xi*pow(Omega,2) - 2*brel*(3 + 2*l)*(1 + n)*xi*pow(Omega,2) + brel*pow(E,lambda)*lambda_der_1*(1 + n)*pow(xi,2)*pow(Omega,2) + 2*pow(brel,3)*pow(E,lambda)*pow(1 + n,3)*theta_der_1*pow(xi,4)*pow(Omega,2)*pow(theta,n) + 8*pow(brel,3)*pow(E,lambda)*pow(1 + n,2)*pow(xi,3)*pow(Omega,2)*pow(theta,1 + n) + 2*pow(brel,3)*pow(E,lambda)*lambda_der_1*pow(1 + n,2)*pow(xi,4)*pow(Omega,2)*pow(theta,1 + n) + (lambda_der_1 + nu_der_1)*(pow(E,nu)*pow(l,2)*(1 + l) + brel*pow(E,lambda)*(1 + n)*pow(xi,2)*pow(Omega,2) - brel*(3 + 2*l)*(1 + n)*pow(xi,2)*pow(Omega,2) + 2*pow(brel,3)*pow(E,lambda)*pow(1 + n,2)*pow(xi,4)*pow(Omega,2)*pow(theta,1 + n)));
+beta_der_7=beta_val_der_7/denom - (denom_der/(denom*denom))*beta_val_7 ; 
+//----------------------
+}
+
+void alpha_H2_W_V_vals_source_bulk(double l, double Omega, double xi,
+double theta, 
+double n, double brel, 
+double gamma_0,
+double lambda, double nu,
+double &alphaH_4, double &alphaH_7, double &alphaH_8, 
+double &alphaW_4, double &alphaW_7,  
+double &alphaV_4, double &alphaV_7, double &alphaV_8 )
+{
+
+vector<double>  beta_vals(4), beta_vals_der(4);
+beta_funcs_and_ders_source_less(l, Omega,  xi, theta, n, brel,lambda, nu, beta_vals, beta_vals_der);
+double  beta_1 = beta_vals[1], beta_2 = beta_vals[2], beta_3 = beta_vals[3];
+//------------------------
+double alpha_4 = 0., alpha_7 = 0.;
+double beta_4 = 0., beta_7 = 0.;
+double beta_der_4 = 0., beta_der_7 = 0.;
+//------------------------
+double lambda_der_1 = (1 - pow(E,lambda) + 2*brel*pow(E,lambda)*pow(xi,2)*pow(theta,n) + 2*brel*pow(E,lambda)*n*pow(xi,2)*pow(theta,n))/xi;
+
+//-------------------------
+alpha_funcs_source_bulk(l, Omega, xi, theta, n, brel, lambda, nu, alpha_4, alpha_7);
+
+beta_funcs_and_ders_source_bulk(l, Omega, xi, theta, n, brel, lambda, nu, beta_4, beta_7, beta_der_4, beta_der_7);
+//----------------------
+alphaW_4 = brel*pow(E,lambda/2.)*xi*alpha_4;
+//----------------------
+alphaW_7 = (pow(E,lambda/2.)*(pow(brel,2)*pow(xi,2)*alpha_7 + (4*Pi*pow(theta,-1 - n))/((1 + n)*gamma_0*(1 + brel*theta))))/(brel*xi);
+//----------------------
+
+//----------------------
+alphaV_4 = (pow(E,nu)*((2*(-3 + 3*pow(E,lambda) + 2*l)*Pi)/(brel*pow(E,lambda)*pow(theta,n)) + (1 + n)*pow(xi,2)*(-8*Pi + l*alpha_4 + xi*beta_4 + brel*(4*Pi + l*alpha_4 + xi*beta_4)*theta)))/(pow(1 + n,2)*pow(xi,3)*pow(Omega,2)*(1 + brel*theta));
+//----------------------
+alphaV_7 = (pow(E,nu)*pow(theta,-1 - n)*(-2*Pi*(-1 + pow(E,lambda) + brel*(-1 + pow(E,lambda) + 2*l)*gamma_0*theta) + pow(brel,2)*(1 + n)*pow(xi,2)*pow(theta,1 + n)*(gamma_0*(l*alpha_7 + xi*beta_7)*(1 + brel*theta) - 4*pow(E,lambda)*Pi*(1 + brel*gamma_0*theta))))/(pow(brel,2)*pow(1 + n,2)*pow(xi,3)*pow(Omega,2)*(gamma_0 + brel*gamma_0*theta));
+//----------------------
+alphaV_8 = (4*pow(E,-lambda + nu)*Pi)/(brel*pow(1 + n,2)*pow(xi,2)*pow(Omega,2)*pow(theta,n)*(1 + brel*theta));
+//----------------------
+
+//----------------------
+alphaH_4 = (((pow(E,lambda)*(-1 + l) - 2*l)*(2 + l) + l*lambda_der_1*xi)*alpha_4 + xi*(lambda_der_1*xi*beta_4 - 2*((3 + 2*l)*beta_4 + xi*(alphaW_4*beta_1 + alphaV_4*beta_2 + beta_der_4))))/(2.*pow(xi,2)*beta_3);
+//----------------------
+alphaH_7 = (brel*gamma_0*(lambda_der_1*xi*(l*alpha_7 + xi*beta_7) - 2*(l*(2 + l)*alpha_7 + xi*((3 + 2*l)*beta_7 + xi*(alphaW_7*beta_1 + alphaV_7*beta_2 + beta_der_7))))*theta + pow(E,lambda)*(-16*Pi + brel*(-2 + l + pow(l,2))*gamma_0*alpha_7*theta))/(2.*brel*gamma_0*pow(xi,2)*beta_3*theta);
+//----------------------
+alphaH_8 = -((alphaV_8*beta_2 + beta_4)/beta_3);
+//----------------------
+
+
+}
+
+//-------------------------------------------------------------------------------------------
+double S_Omega_bulk(double Omega, double xi,
+double theta, 
+double n, double brel, 
+double gamma_0,
+double lambda, double nu,
+double fzeta,
+double H0,
+double V,
+double W
+)
+{
+double theta_der_1 = -0.5*((1 + brel*theta)*(-1 + pow(E,lambda) + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*pow(xi,2)*pow(theta,1 + n)))/(brel*(1 + n)*xi);
+
+return
+-0.25*(brel*(1 + n)*pow(xi,2)*Omega*fzeta*H0)/(pow(E,nu/2.)*Pi*gamma_0*theta) + (brel*pow(1 + n,2)*pow(xi,2)*pow(Omega,3)*fzeta*V)/(4.*pow(E,(3*nu)/2.)*Pi*gamma_0*theta) + (pow(E,-0.5*lambda - nu/2.)*(1 + n)*Omega*fzeta*W*(-1 + pow(E,lambda) + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*pow(xi,2)*pow(theta,1 + n)))/(8.*Pi*gamma_0*theta)
+;
+}
