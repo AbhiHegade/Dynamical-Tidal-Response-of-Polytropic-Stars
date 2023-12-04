@@ -22,6 +22,7 @@ using std::log;
 #include "sim_params.hpp"
 #include "outputfiles.hpp"
 #include "conservative_tides.hpp"
+#include "dissipative_tides_bulk.hpp"
 
 void get_diff_radius(double n ,double brel, double thetaf, double muR0, double xi1, double &xitrue );
 //------------------------------------------------------------------------------------
@@ -74,19 +75,34 @@ write_bkg<<sp.n<<"\t"
 write_bkg.close();
 
 // /*-----------------------------------------------------------*/
+double dens_avg = 0.;
+double visc_bulk_avg = 0.;
+if(sp.solve_visc)
+{
+    // Compute density and viscosity average
+
+    trapezoid_integrate(sp.n, 
+    "bulk", theta_v, lambda_v,  xivals_LE_v, dens_avg, visc_bulk_avg);
+
+    // trapezoid_integrate(sp.n, sp.b, 
+    // "shear", theta_v, mu_v,  xivals_LE_v, dens_avg, visc_shear_avg);
+
+    cout<<"dens_avg = "<<dens_avg<<endl;
+    cout<<"visc_bulk_avg = "<<visc_bulk_avg<<endl;
+    // cout<<"visc_shear_avg = "<<visc_shear_avg<<endl;
+    // cout<<"dens_avg/visc_bulk_avg = "<<dens_avg/visc_bulk_avg<<endl;
+}
 // /*-----------------------------------------------------------*/
 int divisions = sp.div_Omega;
 assert(sp.Omegahigh>sp.Omegalow);
 double deltaomega = (sp.Omegahigh - sp.Omegalow)/(divisions-1);
-// vector<double> ks(divisions);
-// vector<double> omegas(divisions);
 for(int i=0; i<divisions; ++i)
 {  
   cout<<"Start Run"<<endl;
   cout<<"===================="<<endl;
   double omega = sp.Omegalow +i*deltaomega;
   double k2 = 0.;
-//   double k2tau = 0.;
+  double k2tau = 0.;
   cout<<"i = "<<i<<endl;
   cout<<"omega = "<<omega<<endl;
   double l=2.;
@@ -104,7 +120,7 @@ for(int i=0; i<divisions; ++i)
   vector<double> W0_v(N_write);
   vector<double> V_v(N_write);
   vector<double> H1_v(N_write);
-  vector<double> r_v(N_write);
+  vector<double> xi_v(N_write);
 
   vector<double> vals_origin(2);
 
@@ -112,15 +128,55 @@ for(int i=0; i<divisions; ++i)
     
   pf.solve_and_iterate_and_write(N_write, sp.steps_num, dr_internal, 
     sp.xil, sp.factor_match*(sp.xil + xi1_true), xi1guess, 
-    k2, H0_v, W0_v, V_v, H1_v, r_v, vals_origin, normk2);
+    k2, H0_v, W0_v, V_v, H1_v, xi_v, vals_origin, normk2);
+  if(sp.solve_visc)
+  {
+    cardinal_cubic_b_spline<double> H0_func(H0_v.begin(), H0_v.end(), sp.xil, xi_v[1]-xi_v[0]);
+    cardinal_cubic_b_spline<double> W0_func(W0_v.begin(), W0_v.end(), sp.xil, xi_v[1]- xi_v[0]);
+    cardinal_cubic_b_spline<double> V_func(V_v.begin(), V_v.end(), sp.xil, xi_v[1]- xi_v[0]);
 
+    cout<<"=============================================="<<endl;
+    cout<<"Solving perturbed problem now"<<endl;
+
+
+    DISS_BULK_TIDE pfbulk(l, omega, sp.n, sp.b, le.nu0, gamma_0, muf, xi1_true,
+    theta, lambda, nu,
+    fzeta_func,
+    H0_func, 
+    W0_func, 
+    V_func,
+    vals_origin[0], vals_origin[1]);
+
+    dr_internal = 1e-8;
+
+    double normk2tau = 0.;
+
+    pfbulk.solve_and_iterate(sp.steps_num, dr_internal, sp.xil, sp.factor_match*(sp.xil + xi1_true),xi1guess, k2tau, normk2tau );
+
+    double p2 = (muf/xi1_true)*(k2tau/k2)*(sp.n+1)*(dens_avg/visc_bulk_avg);
+
+    double hat_tau_bulk = k2tau/k2;
+    double p2_bulk = p2;
+    double norm_bulk = normk2tau;
+
+    write_output
+    <<omega<<"\t"<<k2<<"\t"<<normk2<<"\t"
+    <<hat_tau_bulk<<"\t"<<p2_bulk<<"\t"<<norm_bulk<<"\t"
+    <<"\n";
+    write_output.flush();
+    cout<<"End Run."<<endl;
+    cout<<"===================="<<endl;
+
+  }
+  else{
 
 
     write_output<<omega<<"\t"<<k2<<"\t"
-        <<normk2<<"\n";
-        write_output.flush();
-        cout<<"End Run."<<endl;
-        cout<<"===================="<<endl;
+    <<normk2<<"\n";
+    write_output.flush();
+    cout<<"End Run."<<endl;
+    cout<<"===================="<<endl;
+  }
 
 }
 
@@ -137,5 +193,4 @@ void get_diff_radius(double n, double brel, double thetaf, double muR0, double x
 
     xitrue = xi1 + diff;
  
-    // cout<<"diff = "<<diff<<endl;
 }

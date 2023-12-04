@@ -311,9 +311,89 @@ double V,
 double W
 )
 {
-double theta_der_1 = -0.5*((1 + brel*theta)*(-1 + pow(E,lambda) + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*pow(xi,2)*pow(theta,1 + n)))/(brel*(1 + n)*xi);
 
 return
 -0.25*(brel*(1 + n)*pow(xi,2)*Omega*fzeta*H0)/(pow(E,nu/2.)*Pi*gamma_0*theta) + (brel*pow(1 + n,2)*pow(xi,2)*pow(Omega,3)*fzeta*V)/(4.*pow(E,(3*nu)/2.)*Pi*gamma_0*theta) + (pow(E,-0.5*lambda - nu/2.)*(1 + n)*Omega*fzeta*W*(-1 + pow(E,lambda) + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*pow(xi,2)*pow(theta,1 + n)))/(8.*Pi*gamma_0*theta)
 ;
 }
+
+//===============================================================================================================================================
+RHS_PF_BULK::RHS_PF_BULK(
+    double l, double Omega, 
+    double n, double brel,
+    double gamma_0,
+    std::function <double(double)> thetafunc,  
+    std::function <double(double)> lambdafunc, 
+    std::function <double(double)> nufunc,
+    std::function <double(double, double)> fzetafunc,
+    std::function <double(double)> H00func,
+    std::function <double(double)> W0func,
+    std::function <double(double)> V0func):
+l{l},
+Omega{Omega},
+n{n},
+brel{brel},
+gamma_0{gamma_0},
+thetafunc{thetafunc},
+lambdafunc{lambdafunc},
+nufunc{nufunc},
+fzetafunc{fzetafunc},
+H00func{H00func},
+W0func{W0func},
+V0func{V0func}
+{
+}
+//-------------------------------------------------
+RHS_PF_BULK::~RHS_PF_BULK(void)
+{
+    
+}
+//---------------------------------------------------
+//---------------------------------------------------
+void RHS_PF_BULK::get_dydx(double xi, const std::vector<double> &y, std::vector<double> &dydx)
+{   
+    double theta = thetafunc(xi);
+    double lambda = lambdafunc(xi);
+    double nu = nufunc(xi);
+    double lambda_der_1 = (1 - pow(E,lambda) + 2*brel*pow(E,lambda)*pow(xi,2)*pow(theta,n) + 2*brel*pow(E,lambda)*n*pow(xi,2)*pow(theta,n))/xi;
+
+
+    vector<double> alpha_H2_vals(4), alpha_W_vals(4), alpha_V_vals(4);
+
+    alpha_H2_W_V_vals_source_less(l, Omega, xi, theta, n, brel, gamma_0, lambda, nu, alpha_H2_vals, alpha_W_vals, alpha_V_vals);
+
+    dydx[0] = y[3];
+    dydx[1] = alpha_W_vals[0]*y[0] + alpha_W_vals[1]*y[1] + alpha_W_vals[2]*y[2] + alpha_W_vals[3]*y[3];
+    dydx[2] = alpha_V_vals[0]*y[0] + alpha_V_vals[1]*y[1] + alpha_V_vals[2]*y[2] + alpha_V_vals[3]*y[3];
+    dydx[3] = alpha_H2_vals[0]*y[0] + alpha_H2_vals[1]*y[1] + alpha_H2_vals[2]*y[2] + alpha_H2_vals[3]*y[3];
+
+//------------------------------------------------------------------
+    double alphaH_4 =0., alphaH_7 =0., alphaH_8 =0., alphaW_4 =0., alphaW_7 =0.,  alphaV_4 =0., alphaV_7 =0., alphaV_8 =0.;
+
+    alpha_H2_W_V_vals_source_bulk(l, Omega, xi, theta, n, brel, gamma_0, lambda, nu, alphaH_4, alphaH_7, alphaH_8, 
+    alphaW_4, alphaW_7, alphaV_4, alphaV_7, alphaV_8 );
+//------------------------------------------------------------------
+    double H00 = H00func(xi);
+    double V0 = V0func(xi);
+    double W0 = W0func(xi);
+
+    double fzeta = fzetafunc(theta,n);
+
+    double S_Omega =  S_Omega_bulk(Omega, xi, theta, n, brel, gamma_0, lambda, nu, fzeta, H00, V0, W0);
+    double S0 = S_Omega*pow(E,lambda);
+//-------------------------------------------------------------------
+    dydx[1] += alphaW_4*S0 + alphaW_7*S_Omega;
+
+    dydx[2] += alphaV_4*S0 + alphaV_7*S_Omega + alphaV_8*S_Omega*pow(E,lambda)*lambda_der_1;
+
+    dydx[3] += alphaH_4*S0 + alphaH_7*S_Omega + alphaH_8*S_Omega*pow(E,lambda)*lambda_der_1;
+
+
+
+}
+// //---------------------------------------------------
+void RHS_PF_BULK::operator()(const std::vector<double> &y , std::vector<double> &dydt , double r )
+{
+    get_dydx(r, y, dydt);
+}
+//---------------------------------------------------

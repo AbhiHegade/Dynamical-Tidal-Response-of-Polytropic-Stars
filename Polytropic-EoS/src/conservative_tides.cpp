@@ -100,9 +100,6 @@ double &norm, double &k2 )
     vector<double> ics1{0.1,0.}, ics2{0.1,0.1} ;
     vector<double> ssl_hom1(len_var), ssl_hom2(len_var);
 
-    // RHS_PF_SOURCELESS rhs(l, omega, efunc, efunc_der, gamma_0, Pfunc, lambdafunc, nufunc);
-    // SERIES_ORIGIN_SOURCELESS series_origin(l, omega, nu0, p_c, e_c, e_der_c, gamma_0);
-    // SERIES_SURF series_surf(l, omega, n, Mstar, Rstar, gamma_0);
 
     if(iterate)
     {
@@ -110,15 +107,12 @@ double &norm, double &k2 )
 
         solve_adaptive(rhs, series_origin,  series_surf, "left", 0, rl, rmatch, Rstar, ics1, ssl_hom1, yl_hom1, dr);
         
-        // solve_adaptive_0("left", 0, rl, rmatch, ics1, ssl_hom1, yl_hom1, dr);
     }
     else{
         solve_adaptive(rhs, series_origin,  series_surf, "left", 1, rl, rmatch, Rstar, ics1, ssl_hom1, yl_hom1, dr);
-        //solve_adaptive_0("left", 1, rl, rmatch, ics1, ssl_hom1, yl_hom1, dr);
     }
     
     solve_adaptive(rhs, series_origin,  series_surf, "left", 1, rl, rmatch, Rstar, ics2, ssl_hom2, yl_hom2, dr);
-    //solve_adaptive_0("left", 1, rl, rmatch, ics2, ssl_hom2, yl_hom2, dr);
   
     //-----------------------------------------
     // Right calculations
@@ -127,15 +121,11 @@ double &norm, double &k2 )
     vector<double> icsr1{0.1,0.,0.}, icsr2{0.1,0.1,0.}, icsr3{0.1,0.1,0.1} ;
     vector<double> ssr_hom1(len_var), ssr_hom2(len_var), ssr_hom3(len_var);
 
-    // out_put_vec(icsr1);
-    // out_put_vec(icsr2);
-    // out_put_vec(icsr3);
     
     if(iterate)
     {
         ssr_hom1 = icsr_val;
         solve_adaptive(rhs, series_origin,  series_surf, "right", 0, rr, rmatch, Rstar, ics1, ssr_hom1, yr_hom1, dr);
-        //solve_adaptive_0( "right", 0, rr, rmatch, ics1, ssr_hom1, yr_hom1, dr);
     }
     else{
           solve_adaptive(rhs, series_origin,  series_surf, "right", 1, rr, rmatch, Rstar, icsr1, ssr_hom1, yr_hom1, dr);
@@ -143,8 +133,6 @@ double &norm, double &k2 )
     
     solve_adaptive(rhs, series_origin,  series_surf, "right", 1, rr, rmatch, Rstar, icsr2, ssr_hom2, yr_hom2, dr);
     solve_adaptive(rhs, series_origin,  series_surf, "right", 1, rr, rmatch, Rstar, icsr3, ssr_hom3, yr_hom3, dr);
-    // solve_adaptive_0("right", 1, rr, rmatch, icsr2, ssr_hom2, yr_hom2, dr);
-    // solve_adaptive_0("right", 1, rr, rmatch, icsr3, ssr_hom3, yr_hom3, dr);
 
     // //========================================================
     get_H0_and_H1_ext();
@@ -173,22 +161,16 @@ double &norm, double &k2 )
     A(5,4) = ssr_hom3[3];
     A(5,5) = -H1_ext[1];
     
-    // cout<<A<<endl;
-    // cout<<b<<endl;
 
 
     Eigen::VectorXd x(6);
     x = A.fullPivLu().solve(b);
     vector<double> Cs(x.data(), x.data() + x.rows() * x.cols());
     check_field_isfinite(rmatch, Cs, "solution for matching coefficients in nan");
-    // cout<<x<<endl;
     double relative_error = (A*x - b).norm() / b.norm(); // norm() is L2 norm
     std::cout << "The relative error is:\n" << relative_error << std::endl;
     std::cout << "The determinant of A is " << A.determinant() << std::endl;
 
-    // cout<<A<<endl;
-    // cout<<b<<endl;
-    // cout<<x<<endl;
     
     for(int i =0; i<len_var; ++i)
     {   
@@ -196,8 +178,6 @@ double &norm, double &k2 )
         
         icsr_val[i] = x[2]*ssr_hom1[i] + x[3]*ssr_hom2[i] + x[4]*ssr_hom3[i] ;
 
-        // cout<<"icsl ["<<"i"<<"] = "<<icsl_val[i]<<endl;
-        // cout<<"icsr ["<<"i"<<"] = "<<icsr_val[i]<<endl;
         
     }
    
@@ -208,15 +188,10 @@ double &norm, double &k2 )
 
     solve_adaptive(rhs, series_origin,  series_surf, "left", 0, rl, rmatch, Rstar, ics1, icsl_val, yl_hom1, dr);
     solve_adaptive(rhs, series_origin,  series_surf, "right", 0, rr, rmatch, Rstar, ics1, icsr_val, yr_hom1, dr);
-    // solve_adaptive_0("left", 0, rl, rmatch, ics1, icsl_val, yl_hom1, dr);
-    // solve_adaptive_0("right", 0, rr, rmatch, ics1, icsr_val, yr_hom1, dr);
 
     norm = 0;
     for(int i = 0; i<len_var; ++i)
     {   
-        // cout<<"yl_part["<<i<<"] = "<<yl_part[i]<<endl;
-        // cout<<"yr_part["<<i<<"] = "<<yr_part[i]<<endl;
-        // cout<<"norm = "<<norm<<endl;
         norm += pow((yl_hom1[i] - yr_hom1[i]),2.);
     }
     norm = pow(norm,0.5);

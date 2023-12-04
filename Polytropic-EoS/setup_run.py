@@ -30,11 +30,11 @@ def get_xi_out(n, b, Omega, val):
 # input_data  = np.array([ [0.5,0.5,1.0429629630], [0.75,0.75,0.5925925926]])
 
 
-input_data = np.array([[1.0,0.75,0.44]])
+input_data = np.array([[0.5,0.5,0.44]])
 #===============================================================================
 sim = Sim()
 sim.output_bvals = 0
-# sim.solve_visc=1
+sim.solve_visc=1
 sim.xil = 0.05
 sim.N_interp_LE = 5000
 sim.N_write = 2999
@@ -42,7 +42,7 @@ sim.steps_num = 3
 sim.factor_match = 0.7
 #----------------------
 sim.Omegalow = 1e-3
-sim.Omegahigh = 0.5
+sim.Omegahigh = 1e-2
 sim.div_Omega = 50
 sim.out_dir = out_path + "/Runs"
 sim.animscript = home_path + "/plot-vals.ipynb"

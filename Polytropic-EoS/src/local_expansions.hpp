@@ -59,12 +59,31 @@ class SERIES_SURF{
 //------------------------------------------------------------------
 void obtain_H0_and_H1_ext(double l, double Omega, double n, double brel, double mu1, double xi1, std::vector<double> &H0_ext, std::vector<double> &H1_ext );
 //------------------------------------------------------------------
+//------------------------------------------------------------------
+class SERIES_ORIGIN_BULK{
+
+    public:
+    SERIES_ORIGIN_BULK(double l, double Omega, double nu0, double n, double brel, double gamma_0, 
+    double fzeta_c, double H0_0, double W0_0);
+    ~SERIES_ORIGIN_BULK(void);
+//----------------------------------------------
+    double l; 
+    double Omega; 
+    double nu0;
+    double n; 
+    double brel; 
+    double gamma_0;
+    double fzeta_c;
+    double H0_0;
+    double W0_0;
+
+    void operator()( double xi, const std::vector<double> yin, std::vector<double> &y );
 
 
+    private:
 
 
-
-
+};
 
 
 

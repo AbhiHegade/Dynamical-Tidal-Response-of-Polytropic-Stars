@@ -20,6 +20,7 @@ OBJ= $(addprefix $(OBJDIR), \
 	main.o \
 	lane-emden-solver.o \
 	conservative_tides.o \
+	dissipative_tides_bulk.o \
 	ode_steppers.o \
 	alpha-beta-funcs.o \
 	Li2.o \

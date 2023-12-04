@@ -79,6 +79,49 @@ double H0,
 double V,
 double W
 );
+//======================================================================================================
+class RHS_PF_BULK{
+    
+public:
+    RHS_PF_BULK(
+    double l, double Omega, 
+    double n, double brel,
+    double gamma_0,
+    std::function <double(double)> thetafunc,  
+    std::function <double(double)> lambdafunc, 
+    std::function <double(double)> nufunc,
+    std::function <double(double, double)> fzetafunc,
+    std::function <double(double)> H00func,
+    std::function <double(double)> W0func,
+    std::function <double(double)> V0func);
+
+    ~RHS_PF_BULK(void);
+//----------------------------------------------
+    double l;
+    double Omega;
+    double n;
+    double brel;
+    double gamma_0;
+    std::function <double(double)> thetafunc;
+    std::function <double(double)> lambdafunc; 
+    std::function <double(double)> nufunc;
+//---------------------------------------------
+    std::function <double(double, double)> fzetafunc;
+
+    std::function <double(double)> H00func;
+    std::function <double(double)> W0func;
+    std::function <double(double)> V0func;
+//---------------------------------------------
+    void operator()( const std::vector<double> &y , std::vector<double> &dydt , double r );
+
+private:
+//============================================================================
+    void get_dydx(double xi, const std::vector<double> &y, std::vector<double> &dydx);
+
+    
+};
+
+//======================================================================================================
 
 
 

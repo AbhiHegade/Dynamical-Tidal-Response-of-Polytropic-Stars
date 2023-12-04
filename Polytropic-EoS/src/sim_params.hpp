@@ -18,7 +18,7 @@ public:
   double Omegahigh;
   int div_Omega;
   double factor_match;
-  // int solve_visc;
+  int solve_visc;
   // std::string visc_type;
   //-----------
 //------------------------------------------------------------------------------

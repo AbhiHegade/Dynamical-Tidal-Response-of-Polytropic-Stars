@@ -16,12 +16,6 @@ void combine_vec(const std::vector<double> vecl, const std::vector<double> vecr,
 
 double fzeta_func(double theta, double n);
 
-double fzeta_der_func(double theta, double n);
-
-double ftau_func(double theta, double n);
-
-double ftau_der_func(double theta, double n);
-
 
 double feta_func(double theta, double n);
 
@@ -45,10 +39,9 @@ void shift_vec(double val, std::vector<double> &vec);
 
 void trapezoid_integrate(
   double n,
-  double b,
   std::string type_visc,
   std::vector<double> thetavals, 
-  std::vector<double> muvals,
+  std::vector<double> lambdavals,
   std::vector<double> xi, double &dens_avg, double &visc_avg);
 
 // double get_random();

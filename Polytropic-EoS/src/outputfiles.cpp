@@ -94,67 +94,11 @@ void combine_vec(const std::vector<double> vecl, const std::vector<double> vecr,
 
 double fzeta_func(double theta, double n)
 {
-  // return pow(theta,n+1);
-  double x0 = 1e-3;
-  if(theta>x0)
-  {
-    return 1.;
-  }
-  else{
-  //   double a00 = ((24 + 26*n + 9*pow(n,2) + pow(n,3))*pow(x0,-1 - n))/6.; 
-  //   double a10 = -0.5*((12 + 19*n + 8*pow(n,2) + pow(n,3))*pow(x0,-2 - n)); 
-  //   double a20 = ((8 + 14*n + 7*pow(n,2) + pow(n,3))*pow(x0,-3 - n))/2.; 
-  //   double a30 = -0.16666666666666666*((6 + 11*n + 6*pow(n,2) + pow(n,3))*pow(x0,-4 - n)); 
-
-  //   return 
-  //   a00*pow(theta,1 + n) + a10*pow(theta,2 + n) + a20*pow(theta,3 + n) + a30*pow(theta,4 + n)
-  //  ;
-
-    double a10 = ((20 + 9*n + pow(n,2))*pow(x0,-3 - n))/2.; 
-double a20 = -((15 + 8*n + pow(n,2))*pow(x0,-4 - n)); 
-double a30 = ((12 + 7*n + pow(n,2))*pow(x0,-5 - n))/2.; 
-return a10*pow(theta,3 + n) + a20*pow(theta,4 + n) + a30*pow(theta,5 + n);
-  }
+  return pow(theta,n+3);
 }
 
-double fzeta_der_func(double theta, double n)
-{
-  // return (n+1)*pow(theta,n);
-  double x0 = 1e-3;
-  if(theta>x0)
-  {
-    return 0.;
-  }
-  else{
-    //   double a00 = ((24 + 26*n + 9*pow(n,2) + pow(n,3))*pow(x0,-1 - n))/6.; 
-    //   double a10 = -0.5*((12 + 19*n + 8*pow(n,2) + pow(n,3))*pow(x0,-2 - n)); 
-    //   double a20 = ((8 + 14*n + 7*pow(n,2) + pow(n,3))*pow(x0,-3 - n))/2.; 
-    //   double a30 = -0.16666666666666666*((6 + 11*n + 6*pow(n,2) + pow(n,3))*pow(x0,-4 - n)); 
 
 
-    // return 
-    // a00*(1 + n)*pow(theta,n) + a10*(2 + n)*pow(theta,1 + n) + a20*(3 + n)*pow(theta,2 + n) + a30*(4 + n)*pow(theta,3 + n)
-    // ;
-
-    double a10 = ((20 + 9*n + pow(n,2))*pow(x0,-3 - n))/2.; 
-double a20 = -((15 + 8*n + pow(n,2))*pow(x0,-4 - n)); 
-double a30 = ((12 + 7*n + pow(n,2))*pow(x0,-5 - n))/2.; 
-return a10*(3 + n)*pow(theta,2 + n) + a20*(4 + n)*pow(theta,3 + n) + a30*(5 + n)*pow(theta,4 + n);
-  }
-}
-
-double ftau_func(double theta, double n)
-{
-  //  return pow(theta,n+1);
-  return fzeta_func(theta,n);
-}
-
-double ftau_der_func(double theta, double n)
-{
-  // return (n+1)*pow(theta,n);
-
-  return fzeta_der_func(theta,n);
-}
 
 double feta_func(double theta, double n)
 {
@@ -251,10 +195,9 @@ void shift_vec(double val,std::vector<double> &vec)
 
 void trapezoid_integrate(
   double n,
-  double b,
   std::string type_visc,
   std::vector<double> thetavals, 
-  std::vector<double> muvals,
+  std::vector<double> lambdavals,
   std::vector<double> xi, double &dens_avg, double &visc_avg)
 {
   dens_avg = 0.; 
@@ -267,8 +210,8 @@ void trapezoid_integrate(
     double thetai = thetavals[i];
     double xii = xi[i];
     double xiim1 = xi[i-1];
-    double lambdai = -log(1.-2.*b*(n+1)*muvals[i]/xii);
-    double lambdaim1 = -log(1.-2.*b*(n+1)*muvals[i-1]/xiim1);
+    double lambdai = lambdavals[i];
+    double lambdaim1 = lambdavals[i-1];
     double fim1 = pow(thetaim1, n)*pow(xiim1,2.)*exp(lambdaim1/2.);
     double fi = pow(thetai, n)*pow(xii,2.)*exp(lambdai/2.);
     double dx = xii-xiim1;

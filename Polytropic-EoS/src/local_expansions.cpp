@@ -190,3 +190,41 @@ void obtain_H0_and_H1_ext(double l, double Omega, double n, double brel, double 
     H1_ext[1] *= dzdxi;
     
 }
+//==========================================================
+SERIES_ORIGIN_BULK::SERIES_ORIGIN_BULK(double l, double Omega, double nu0, double n, double brel, double gamma_0, 
+    double fzeta_c, double H0_0, double W0_0):
+l{l},
+Omega{Omega},
+nu0{nu0},
+n{n},
+brel{brel},
+gamma_0{gamma_0},
+fzeta_c{fzeta_c},
+H0_0{H0_0},
+W0_0{W0_0}
+{
+
+}
+
+//-------------------------------------------------
+SERIES_ORIGIN_BULK::~SERIES_ORIGIN_BULK(void)
+{
+}
+//-------------------------------------------------
+void SERIES_ORIGIN_BULK::operator()( double xi, const std::vector<double> yin, std::vector<double> &y )
+{   
+    
+double H_0= yin[0];
+double W_0= yin[1];
+//-----------------------------
+y[0] = H_0 + ((1 + n)*pow(xi,2)*((-3*pow(E,nu0)*fzeta_c*H0_0*Omega)/(3 + 2*l) + (fzeta_c*(1 + n)*W0_0*Omega*((1 + 3*brel)*pow(E,nu0)*l - 3*pow(Omega,2)))/(l*(3 + 2*l)) - (2*pow(E,nu0/2.)*H_0*gamma_0*(pow(E,nu0)*(1 + l)*(3 + 3*pow(brel,2)*(9 + l)*gamma_0 + brel*(3 + (15 - 3*l - 2*pow(l,2))*gamma_0)) + 3*brel*(9 + l)*gamma_0*pow(Omega,2)))/((1 + l)*(6 + 4*l)) - ((1 + brel)*pow(E,nu0/2.)*W_0*gamma_0*((1 + 3*brel)*pow(E,nu0)*l*(1 + l)*(-1 + n*(-1 + gamma_0)) - 3*(1 + n)*(-1 + 9*brel*gamma_0 + l*(-1 + brel*gamma_0))*pow(Omega,2)))/(l*(1 + l)*(3 + 2*l))))/(6.*pow(E,(3*nu0)/2.)*pow(gamma_0,2));
+//----------------------
+y[1] = W_0 + (pow(xi,2)*((-3*fzeta_c*H0_0*Omega*((1 + 3*brel)*pow(E,nu0)*l*(1 + l) + 3*(2 + l)*pow(Omega,2)))/((1 + brel)*pow(E,nu0/2.)) + 3*H_0*gamma_0*(((1 + 3*brel)*pow(E,nu0)*l*(1 + l)*(-1 + n*(-1 + gamma_0)))/(1 + n) + 3*(-2 - 6*brel*gamma_0 + l*(-1 + brel*gamma_0))*pow(Omega,2)) + (fzeta_c*(1 + n)*W0_0*Omega*(pow(E,2*nu0)*(1 + l)*pow(l + 3*brel*l,2) + 3*(1 + 3*brel)*pow(E,nu0)*l*pow(Omega,2) - 9*(2 + l)*pow(Omega,4)))/((1 + brel)*pow(E,(3*nu0)/2.)*l) + (W_0*gamma_0*(-(pow(E,2*nu0)*(1 + l)*pow(l + 3*brel*l,2)*(-1 + n*(-1 + gamma_0))) + 3*pow(E,nu0)*l*(1 + n + n*gamma_0 + l*n*gamma_0 + 6*pow(brel,2)*(-1 + l)*(1 + n)*gamma_0 + brel*(3 + 2*(-4 + 3*l + pow(l,2))*gamma_0 + n*(3 + (-5 + 9*l + 2*pow(l,2))*gamma_0)))*pow(Omega,2) - 9*(2 + l)*(1 + n)*pow(Omega,4)))/(pow(E,nu0)*l)))/(18.*(3 + 2*l)*pow(gamma_0,2)*pow(Omega,2));
+//----------------------
+y[2] = -(W_0/l) + (pow(xi,2)*((3*fzeta_c*H0_0*Omega*((1 + 3*brel)*pow(E,nu0)*(3 + l) + 3*pow(Omega,2)))/((1 + brel)*pow(E,nu0/2.)) - (3*H_0*gamma_0*((1 + 3*brel)*pow(E,nu0)*(3 + 4*l + pow(l,2))*(-1 + n*(-1 + gamma_0)) + 3*(1 + n)*(-1 + 9*brel*gamma_0 + l*(-1 + brel*gamma_0))*pow(Omega,2)))/((1 + l)*(1 + n)) - (fzeta_c*(1 + n)*W0_0*Omega*(pow(1 + 3*brel,2)*pow(E,2*nu0)*l*(3 + l) - 9*(1 + 3*brel)*pow(E,nu0)*pow(Omega,2) - 9*pow(Omega,4)))/((1 + brel)*pow(E,(3*nu0)/2.)*l) + (W_0*gamma_0*(pow(1 + 3*brel,2)*pow(E,2*nu0)*l*(3 + 4*l + pow(l,2))*(-1 + n*(-1 + gamma_0)) - 3*pow(E,nu0)*(6*pow(brel,2)*(-3 + 2*l + pow(l,2))*(1 + n)*gamma_0 + (1 + l)*(-3 + n*(-3 + (3 + l)*gamma_0)) + brel*(2*pow(l,3)*(1 + n)*gamma_0 + pow(l,2)*(8 + 11*n)*gamma_0 + 3*l*(-3 - 3*n + 4*n*gamma_0) - 3*(3 + 3*n + 10*gamma_0 + 7*n*gamma_0)))*pow(Omega,2) + 9*(1 + l)*(1 + n)*pow(Omega,4)))/(pow(E,nu0)*l*(1 + l))))/(18.*(3 + 2*l)*pow(gamma_0,2)*pow(Omega,2));
+//----------------------
+y[3] = ((1 + n)*xi*((-3*pow(E,nu0)*fzeta_c*H0_0*Omega)/(3 + 2*l) + (fzeta_c*(1 + n)*W0_0*Omega*((1 + 3*brel)*pow(E,nu0)*l - 3*pow(Omega,2)))/(l*(3 + 2*l)) - (2*pow(E,nu0/2.)*H_0*gamma_0*(pow(E,nu0)*(1 + l)*(3 + 3*pow(brel,2)*(9 + l)*gamma_0 + brel*(3 + (15 - 3*l - 2*pow(l,2))*gamma_0)) + 3*brel*(9 + l)*gamma_0*pow(Omega,2)))/((1 + l)*(6 + 4*l)) - ((1 + brel)*pow(E,nu0/2.)*W_0*gamma_0*((1 + 3*brel)*pow(E,nu0)*l*(1 + l)*(-1 + n*(-1 + gamma_0)) - 3*(1 + n)*(-1 + 9*brel*gamma_0 + l*(-1 + brel*gamma_0))*pow(Omega,2)))/(l*(1 + l)*(3 + 2*l))))/(3.*pow(E,(3*nu0)/2.)*pow(gamma_0,2));
+//----------------------
+    
+}
+//-------------------------------------------------
