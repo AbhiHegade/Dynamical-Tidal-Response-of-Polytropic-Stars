@@ -23,6 +23,7 @@ OBJ= $(addprefix $(OBJDIR), \
 	dissipative_tides_bulk.o \
 	ode_steppers.o \
 	alpha-beta-funcs.o \
+	alpha-beta-funcs-shear.o \
 	Li2.o \
 	Li3.o \
 	local_expansions.o \
