@@ -23,6 +23,7 @@ using std::log;
 #include "outputfiles.hpp"
 #include "conservative_tides.hpp"
 #include "dissipative_tides_bulk.hpp"
+#include "shear_funcs.hpp"
 
 void get_diff_radius(double n ,double brel, double thetaf, double muR0, double xi1, double &xitrue );
 //------------------------------------------------------------------------------------
@@ -77,6 +78,7 @@ write_bkg.close();
 // /*-----------------------------------------------------------*/
 double dens_avg = 0.;
 double visc_bulk_avg = 0.;
+double visc_shear_avg=0.;
 if(sp.solve_visc)
 {
     // Compute density and viscosity average
@@ -84,13 +86,13 @@ if(sp.solve_visc)
     trapezoid_integrate(sp.n, 
     "bulk", theta_v, lambda_v,  xivals_LE_v, dens_avg, visc_bulk_avg);
 
-    // trapezoid_integrate(sp.n, sp.b, 
-    // "shear", theta_v, mu_v,  xivals_LE_v, dens_avg, visc_shear_avg);
+    trapezoid_integrate(sp.n, 
+    "shear", theta_v, lambda_v,  xivals_LE_v, dens_avg, visc_shear_avg);
 
     cout<<"dens_avg = "<<dens_avg<<endl;
     cout<<"visc_bulk_avg = "<<visc_bulk_avg<<endl;
-    // cout<<"visc_shear_avg = "<<visc_shear_avg<<endl;
-    // cout<<"dens_avg/visc_bulk_avg = "<<dens_avg/visc_bulk_avg<<endl;
+    cout<<"visc_shear_avg = "<<visc_shear_avg<<endl;
+    cout<<"dens_avg/visc_bulk_avg = "<<dens_avg/visc_bulk_avg<<endl;
 }
 // /*-----------------------------------------------------------*/
 int divisions = sp.div_Omega;
@@ -134,6 +136,7 @@ for(int i=0; i<divisions; ++i)
     cardinal_cubic_b_spline<double> H0_func(H0_v.begin(), H0_v.end(), sp.xil, xi_v[1]-xi_v[0]);
     cardinal_cubic_b_spline<double> W0_func(W0_v.begin(), W0_v.end(), sp.xil, xi_v[1]- xi_v[0]);
     cardinal_cubic_b_spline<double> V_func(V_v.begin(), V_v.end(), sp.xil, xi_v[1]- xi_v[0]);
+    cardinal_cubic_b_spline<double> H0der_func(H1_v.begin(), H1_v.end(), sp.xil, xi_v[1]- xi_v[0]);
 
     cout<<"=============================================="<<endl;
     cout<<"Solving perturbed problem now"<<endl;
@@ -147,6 +150,7 @@ for(int i=0; i<divisions; ++i)
     V_func,
     vals_origin[0], vals_origin[1]);
 
+
     dr_internal = 1e-8;
 
     double normk2tau = 0.;
@@ -155,14 +159,37 @@ for(int i=0; i<divisions; ++i)
 
     double p2 = (muf/xi1_true)*(k2tau/k2)*(sp.n+1)*(dens_avg/visc_bulk_avg);
 
-    double hat_tau_bulk = k2tau/k2;
-    double p2_bulk = p2;
-    double norm_bulk = normk2tau;
+    double hat_tau = k2tau/k2;
 
     write_output
     <<omega<<"\t"<<k2<<"\t"<<normk2<<"\t"
-    <<hat_tau_bulk<<"\t"<<p2_bulk<<"\t"<<norm_bulk<<"\t"
-    <<"\n";
+    <<hat_tau<<"\t"<<p2<<"\t"<<normk2tau<<"\t";
+  
+//------------------------------------------------------------------------
+    cout<<"Solving for shear lag"<<endl;
+
+    DISS_SHEAR_TIDE pfshear(l, omega, sp.n, sp.b, le.nu0, gamma_0, muf, xi1_true, theta, lambda, nu,
+    feta_func, feta_der_func, feta_der_2_func, 
+    H0_func,W0_func, V_func, H0der_func,
+    vals_origin[0], vals_origin[1]);
+
+    dr_internal = 1e-8;
+    normk2tau = 0.;
+    k2tau = 0.;
+
+    out_put_vec(vals_origin);
+
+    // cout<<"here"<<endl;
+
+    pfshear.solve_and_iterate(sp.steps_num, dr_internal, sp.xil, sp.factor_match*(sp.xil + xi1_true),xi1guess, k2tau, normk2tau );
+
+    // cout<<"here"<<endl;
+
+    p2 = (muf/xi1_true)*(k2tau/k2)*(sp.n+1)*(dens_avg/visc_shear_avg);
+
+    hat_tau = k2tau/k2;
+    
+    write_output<<hat_tau<<"\t"<<p2<<"\t"<<normk2tau<<"\n";
     write_output.flush();
     cout<<"End Run."<<endl;
     cout<<"===================="<<endl;

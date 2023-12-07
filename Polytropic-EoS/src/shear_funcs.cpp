@@ -12,36 +12,40 @@ using std::log;
 const double E = 2.718281828459045;
 const double Pi = 3.14159265358979323846;
 //-------------------------------------------------
-#include "alpha-beta-funcs-shear.hpp"
+#include "shear_funcs.hpp"
+#include "ode_steppers.hpp"
+#include "outputfiles.hpp"
+#include "alpha-beta-funcs.hpp"
+#include "local_expansions.hpp"
 //-------------------------------------------------
-void get_alpha_beta_funcs_ders_and_shear_source(double l, double Omega, double xi,
-double theta, 
-double n, double brel, 
-double gamma_0,
-double lambda, double nu,
-double feta, double feta_der, double feta_der_2,
-double H00, double V0, double W0, double H00der, 
-std::vector<double> y,
-std::vector<double> &dydx)
+void get_alpha_beta_funcs_ders_and_shear_source(
+    double l, double Omega, double xi,
+    double theta, 
+    double n, double brel, 
+    double gamma_0,
+    double lambda, double nu,
+    double feta, double feta_der, double feta_der_2,
+    double H00,  double W0, double V0, double H00der, 
+    std::vector<double> y,
+    std::vector<double> &dydx)
 {
-
+// cout<<"here"<<endl;
 //===========================================================================================
 //-----------------------Derivative of background field quantities---------------------------
 //===========================================================================================
+double theta_der_1= -0.5*((-1 + pow(E,lambda))*(1 + brel*theta))/(brel*(1 + n)*xi) - brel*pow(E,lambda)*xi*pow(theta,1 + n)*(1 + brel*theta) ; 
 
-double theta_der_1= -0.5*((1 + brel*theta)*(-1 + pow(E,lambda) + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*pow(xi,2)*pow(theta,1 + n)))/(brel*(1 + n)*xi) ; 
+double lambda_der_1= (1 - pow(E,lambda))/xi + 2*brel*pow(E,lambda)*(1 + n)*xi*pow(theta,n) ; 
 
-double lambda_der_1= (1 - pow(E,lambda) + 2*brel*pow(E,lambda)*pow(xi,2)*pow(theta,n) + 2*brel*pow(E,lambda)*n*pow(xi,2)*pow(theta,n))/xi ; 
+double nu_der_1= (-1 + pow(E,lambda))/xi + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*xi*pow(theta,1 + n) ; 
 
-double nu_der_1= (-1 + pow(E,lambda) + 2*pow(brel,2)*pow(E,lambda)*pow(xi,2)*pow(theta,1 + n) + 2*pow(brel,2)*pow(E,lambda)*n*pow(xi,2)*pow(theta,1 + n))/xi ; 
+double theta_der_2= ((-1 + pow(E,lambda))*(1 + 2*n + pow(E,lambda)*(3 + 2*n))*(1 + brel*theta))/(4.*brel*pow(1 + n,2)*pow(xi,2)) + pow(brel,2)*pow(E,2*lambda)*pow(xi,2)*pow(theta,1 + 2*n)*(1 + brel*theta)*(-1 - n + brel*(2 + n)*theta) + (pow(E,lambda)*pow(theta,n)*(1 + brel*theta)*(-((1 + pow(E,lambda))*(1 + n)) + brel*(-7 - 5*n + pow(E,lambda)*(5 + 3*n))*theta))/(2.*(1 + n)) ; 
 
-double theta_der_2= ((1 + brel*theta)*((-1 + pow(E,lambda))*(1 + 2*n + pow(E,lambda)*(3 + 2*n)) - 2*brel*pow(E,lambda)*(1 + pow(E,lambda))*pow(1 + n,2)*pow(xi,2)*pow(theta,n) + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*(-7 - 5*n + pow(E,lambda)*(5 + 3*n))*pow(xi,2)*pow(theta,1 + n) - 4*pow(brel,3)*pow(E,2*lambda)*pow(1 + n,3)*pow(xi,4)*pow(theta,1 + 2*n) + 4*pow(brel,4)*pow(E,2*lambda)*pow(1 + n,2)*(2 + n)*pow(xi,4)*pow(theta,2 + 2*n)))/(4.*brel*pow(1 + n,2)*pow(xi,2)) ; 
+double lambda_der_2= (-1 + pow(E,2*lambda))/pow(xi,2) - 2*pow(brel,2)*pow(E,2*lambda)*(1 + n)*pow(xi,2)*pow(theta,2*n)*(-2 - n + brel*n*theta) - pow(E,lambda)*(-1 + pow(E,lambda))*pow(theta,-1 + n)*(n + brel*(4 + 5*n)*theta) ; 
 
-double lambda_der_2= (-1 + pow(E,2*lambda))/pow(xi,2) - pow(E,lambda)*(-1 + pow(E,lambda))*n*pow(theta,-1 + n) - brel*pow(E,lambda)*(-1 + pow(E,lambda))*(4 + 5*n)*pow(theta,n) + 2*pow(brel,2)*pow(E,2*lambda)*(2 + 3*n + pow(n,2))*pow(xi,2)*pow(theta,2*n) - 2*pow(brel,3)*pow(E,2*lambda)*n*(1 + n)*pow(xi,2)*pow(theta,1 + 2*n) ; 
+double nu_der_2= (1 - pow(E,2*lambda))/pow(xi,2) - 2*pow(brel,3)*pow(E,2*lambda)*pow(1 + n,2)*pow(xi,2)*pow(theta,1 + 2*n)*(-1 + brel*theta) - brel*pow(E,lambda)*(1 + n)*pow(theta,n)*(-1 - pow(E,lambda) + brel*(-5 + 3*pow(E,lambda))*theta) ; 
 
-double nu_der_2= pow(xi,-2) - pow(E,2*lambda)/pow(xi,2) + brel*pow(E,lambda)*(1 + pow(E,lambda))*(1 + n)*pow(theta,n) - pow(brel,2)*pow(E,lambda)*(-5 + 3*pow(E,lambda))*(1 + n)*pow(theta,1 + n) + 2*pow(brel,3)*pow(E,2*lambda)*pow(1 + n,2)*pow(xi,2)*pow(theta,1 + 2*n) - 2*pow(brel,4)*pow(E,2*lambda)*pow(1 + n,2)*pow(xi,2)*pow(theta,2 + 2*n) ; 
-
-double nu_der_3= (2*(-1 + pow(E,3*lambda)))/pow(xi,3) - (pow(E,lambda)*(-1 + pow(E,2*lambda))*n*pow(theta,-1 + n))/(2.*xi) - (brel*pow(E,lambda)*(-7 - 8*n + 6*pow(E,lambda)*(1 + n) + pow(E,2*lambda)*(9 + 10*n))*pow(theta,n))/(2.*xi) + pow(brel,2)*pow(E,2*lambda)*(1 + n)*(3*(1 + n) + pow(E,lambda)*(3 + n))*xi*pow(theta,2*n) + (15*pow(brel,2)*pow(E,lambda)*pow(-1 + pow(E,lambda),2)*(1 + n)*pow(theta,1 + n))/(2.*xi) - 2*pow(brel,3)*pow(E,2*lambda)*(1 + n)*(-6*(1 + n) + pow(E,lambda)*(6 + 7*n))*xi*pow(theta,1 + 2*n) + 3*pow(brel,4)*pow(E,2*lambda)*(-5 + 3*pow(E,lambda))*pow(1 + n,2)*xi*pow(theta,2 + 2*n) + 2*pow(brel,4)*pow(E,3*lambda)*pow(1 + n,2)*(3 + 2*n)*pow(xi,3)*pow(theta,1 + 3*n) - 2*pow(brel,5)*pow(E,3*lambda)*pow(1 + n,2)*(3 + 4*n)*pow(xi,3)*pow(theta,2 + 3*n) + 4*pow(brel,6)*pow(E,3*lambda)*pow(1 + n,3)*pow(xi,3)*pow(theta,3 + 3*n) ; 
+double nu_der_3= (2*(-1 + pow(E,3*lambda)))/pow(xi,3) + 2*pow(brel,4)*pow(E,3*lambda)*pow(1 + n,2)*pow(xi,3)*pow(theta,1 + 3*n)*(3 + 2*n - brel*(3 + 4*n)*theta + 2*pow(brel,2)*(1 + n)*pow(theta,2)) + (pow(E,lambda)*pow(theta,-1 + n)*(n - pow(E,2*lambda)*n - brel*(-7 - 8*n + 6*pow(E,lambda)*(1 + n) + pow(E,2*lambda)*(9 + 10*n))*theta + 15*pow(brel,2)*pow(-1 + pow(E,lambda),2)*(1 + n)*pow(theta,2)))/(2.*xi) + pow(brel,2)*pow(E,2*lambda)*(1 + n)*xi*pow(theta,2*n)*(3*(1 + n) + pow(E,lambda)*(3 + n) - 2*brel*(-6*(1 + n) + pow(E,lambda)*(6 + 7*n))*theta + 3*pow(brel,2)*(-5 + 3*pow(E,lambda))*(1 + n)*pow(theta,2)) ; 
 
 //===========================================================================================
 
@@ -60,13 +64,13 @@ double denom_alpha_der_2= pow(E,nu)*(pow(E,lambda + nu)*l*(-2 - l + 2*pow(l,2) +
 //===========================================================================================
 
 //-------------------------------------------------------------
-double denom_beta = xi*denom_alpha;
+double denom_beta= pow(E,nu)*xi*(pow(E,lambda + nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3)) + 4*brel*(1 + n)*pow(xi,2)*pow(Omega,2) - 4*brel*pow(E,lambda)*(-1 + l + pow(l,2))*(1 + n)*pow(xi,2)*pow(Omega,2) - 4*brel*(1 + n)*nu_der_1*pow(xi,3)*pow(Omega,2) + brel*(1 + n)*pow(nu_der_1,2)*pow(xi,4)*pow(Omega,2) + 4*pow(brel,2)*pow(E,lambda - nu)*pow(1 + n,2)*pow(xi,4)*pow(Omega,4)) ; 
 
-double denom_beta_der_1 = denom_alpha + xi*denom_alpha_der_1;
+double denom_beta_der_1= pow(E,nu)*(pow(E,lambda + nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3)) + pow(E,lambda + nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3))*nu_der_1*xi + pow(E,lambda + nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3))*(lambda_der_1 + nu_der_1)*xi + 12*brel*(1 + n)*pow(xi,2)*pow(Omega,2) - 12*brel*pow(E,lambda)*(-1 + l + pow(l,2))*(1 + n)*pow(xi,2)*pow(Omega,2) - 4*brel*pow(E,lambda)*(-1 + l + pow(l,2))*lambda_der_1*(1 + n)*pow(xi,3)*pow(Omega,2) - 12*brel*(1 + n)*nu_der_1*pow(xi,3)*pow(Omega,2) - 4*brel*pow(E,lambda)*(-1 + l + pow(l,2))*(1 + n)*nu_der_1*pow(xi,3)*pow(Omega,2) + brel*(1 + n)*pow(nu_der_1,2)*pow(xi,4)*pow(Omega,2) - 4*brel*(1 + n)*nu_der_2*pow(xi,4)*pow(Omega,2) + brel*(1 + n)*pow(nu_der_1,3)*pow(xi,5)*pow(Omega,2) + 2*brel*(1 + n)*nu_der_1*nu_der_2*pow(xi,5)*pow(Omega,2) + 20*pow(brel,2)*pow(E,lambda - nu)*pow(1 + n,2)*pow(xi,4)*pow(Omega,4) + 4*pow(brel,2)*pow(E,lambda - nu)*pow(1 + n,2)*(lambda_der_1 - nu_der_1)*pow(xi,5)*pow(Omega,4) + 4*pow(brel,2)*pow(E,lambda - nu)*pow(1 + n,2)*nu_der_1*pow(xi,5)*pow(Omega,4)) ; 
 
-double denom_beta_der_2 = 2.0*denom_alpha_der_1 + xi*denom_alpha_der_2;
+double denom_beta_der_2= 6*brel*pow(E,nu)*(1 + n)*pow(nu_der_1,3)*pow(xi,4)*pow(Omega,2) + brel*pow(E,nu)*(1 + n)*pow(nu_der_1,4)*pow(xi,5)*pow(Omega,2) + pow(E,nu)*pow(nu_der_1,2)*xi*(4*pow(E,lambda + nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3)) - 8*brel*(1 + n)*pow(xi,2)*pow(Omega,2) - 4*brel*pow(E,lambda)*(-1 + l + pow(l,2))*(1 + n)*pow(xi,2)*pow(Omega,2) + 5*brel*(1 + n)*nu_der_2*pow(xi,4)*pow(Omega,2)) + pow(E,lambda)*pow(lambda_der_1,2)*xi*(pow(E,2*nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3)) - 4*brel*pow(E,nu)*(-1 + l + pow(l,2))*(1 + n)*pow(xi,2)*pow(Omega,2) + 4*pow(brel,2)*pow(1 + n,2)*pow(xi,4)*pow(Omega,4)) + 2*pow(E,lambda)*lambda_der_1*(pow(E,2*nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3)) - 12*brel*pow(E,nu)*(-1 + l + pow(l,2))*(1 + n)*pow(xi,2)*pow(Omega,2) + 20*pow(brel,2)*pow(1 + n,2)*pow(xi,4)*pow(Omega,4) + 2*pow(E,nu)*nu_der_1*xi*(pow(E,nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3)) - 2*brel*(-1 + l + pow(l,2))*(1 + n)*pow(xi,2)*pow(Omega,2))) + 2*pow(E,nu)*nu_der_1*(4*brel*(1 + n)*nu_der_2*pow(xi,4)*pow(Omega,2) + brel*(1 + n)*nu_der_3*pow(xi,5)*pow(Omega,2) + 2*(pow(E,lambda + nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3)) - 6*brel*(1 + n)*pow(xi,2)*pow(Omega,2) - 6*brel*pow(E,lambda)*(-1 + l + pow(l,2))*(1 + n)*pow(xi,2)*pow(Omega,2))) + xi*(pow(E,lambda)*lambda_der_2*(pow(E,2*nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3)) - 4*brel*pow(E,nu)*(-1 + l + pow(l,2))*(1 + n)*pow(xi,2)*pow(Omega,2) + 4*pow(brel,2)*pow(1 + n,2)*pow(xi,4)*pow(Omega,4)) + 2*(brel*pow(E,nu)*(1 + n)*pow(nu_der_2,2)*pow(xi,4)*pow(Omega,2) + 2*brel*(1 + n)*pow(Omega,2)*(6*pow(E,nu) - 6*pow(E,lambda + nu)*(-1 + l + pow(l,2)) - pow(E,nu)*nu_der_3*pow(xi,3) + 20*brel*pow(E,lambda)*(1 + n)*pow(xi,2)*pow(Omega,2)) + pow(E,nu)*nu_der_2*(pow(E,lambda + nu)*l*(-2 - l + 2*pow(l,2) + pow(l,3)) - 14*brel*(1 + n)*pow(xi,2)*pow(Omega,2) - 2*brel*pow(E,lambda)*(-1 + l + pow(l,2))*(1 + n)*pow(xi,2)*pow(Omega,2)))) ; 
 
-//-------------------------------------------------------------
+
 //----------------------
 double alpha_0 = -2*pow(E,nu)*(pow(E,2*lambda + nu)*l*(1 + l) - pow(E,nu)*l*pow(1 + l,2) + pow(E,lambda + nu)*l*(-2 + 3*pow(l,2) + pow(l,3)) - 2*brel*(-7 + 2*l)*(1 + n)*pow(xi,2)*pow(Omega,2) - 2*brel*pow(E,lambda)*(3 + l + pow(l,2))*(1 + n)*pow(xi,2)*pow(Omega,2) - 2*brel*pow(E,lambda)*(1 + n)*pow(xi,2)*(pow(E,nu)*l*(1 + l) - 2*brel*(1 + n)*pow(xi,2)*pow(Omega,2))*pow(theta,n) + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*pow(xi,2)*(2*pow(E,lambda + nu)*l*(1 + l) + pow(E,nu)*l*(-3 - 2*l + pow(l,2)) - 4*brel*(1 + n)*pow(xi,2)*pow(Omega,2))*pow(theta,1 + n) + 4*pow(brel,4)*pow(E,2*lambda + nu)*l*(1 + l)*pow(1 + n,2)*pow(xi,4)*pow(theta,2 + 2*n));
 alpha_0 = alpha_0/denom_alpha ; 
@@ -264,146 +268,76 @@ double alphaV_der2_1 = -0.25*(8*pow(E,lambda/2.)*pow(xi,2) - 4*pow(E,lambda/2.)*
 double alphaV_der2_2 = (2*(-1 + pow(E,lambda) - l + (pow(E,nu)*(l*alpha_2 + xi*beta_2))/((1 + n)*pow(Omega,2))))/pow(xi,3) - (2*(pow(E,lambda)*lambda_der_1*(1 + n)*pow(Omega,2) + pow(E,nu)*nu_der_1*(l*alpha_2 + xi*beta_2) + pow(E,nu)*(l*alpha_der_2 + beta_2 + xi*beta_der_2)))/((1 + n)*pow(xi,2)*pow(Omega,2)) + (pow(E,lambda)*pow(lambda_der_1,2)*(1 + n)*pow(Omega,2) + pow(E,lambda)*lambda_der_2*(1 + n)*pow(Omega,2) + pow(E,nu)*(pow(nu_der_1,2) + nu_der_2)*(l*alpha_2 + xi*beta_2) + pow(E,nu)*(l*alpha_der2_2 + xi*beta_der2_2 + 2*beta_der_2) + 2*pow(E,nu)*nu_der_1*(l*alpha_der_2 + beta_2 + xi*beta_der_2))/((1 + n)*xi*pow(Omega,2)) + (pow(E,lambda)*(pow(lambda_der_1,2) + lambda_der_2)*(-1 + n*(-1 + gamma_0)))/(2.*brel*(1 + n)*gamma_0*xi*theta) + (brel*pow(E,lambda)*(pow(lambda_der_1,2) + lambda_der_2)*(-1 + n*(-1 + gamma_0))*xi*pow(theta,n))/gamma_0 + 2*pow(brel,2)*pow(E,lambda)*(pow(lambda_der_1,2) + lambda_der_2)*(1 + n)*xi*pow(theta,1 + n) - (pow(E,lambda)*lambda_der_1*(-1 + n*(-1 + gamma_0))*(theta_der_1*xi + theta))/(brel*(1 + n)*gamma_0*pow(xi,2)*pow(theta,2)) + (2*brel*pow(E,lambda)*lambda_der_1*(-1 + n*(-1 + gamma_0))*pow(theta,-1 + n)*(n*theta_der_1*xi + theta))/gamma_0 + 4*pow(brel,2)*pow(E,lambda)*lambda_der_1*(1 + n)*pow(theta,n)*((1 + n)*theta_der_1*xi + theta) + (brel*pow(E,lambda)*n*(-1 + n*(-1 + gamma_0))*pow(theta,-2 + n)*((-1 + n)*pow(theta_der_1,2)*xi + (2*theta_der_1 + theta_der_2*xi)*theta))/gamma_0 + 2*pow(brel,2)*pow(E,lambda)*pow(1 + n,2)*pow(theta,-1 + n)*(n*pow(theta_der_1,2)*xi + (2*theta_der_1 + theta_der_2*xi)*theta) + ((-1 + pow(E,lambda))*(-1 + n*(-1 + gamma_0))*(2*pow(theta_der_1,2)*pow(xi,2) + xi*(2*theta_der_1 - theta_der_2*xi)*theta + 2*pow(theta,2)))/(2.*brel*(1 + n)*gamma_0*pow(xi,3)*pow(theta,3));
 double alphaV_der2_3 = (pow(E,nu)*(l*(2 - 2*nu_der_1*xi + pow(nu_der_1,2)*pow(xi,2) + nu_der_2*pow(xi,2))*alpha_3 + xi*(2*l*(-1 + nu_der_1*xi)*alpha_der_3 + xi*(2*nu_der_2*xi + l*alpha_der2_3 + nu_der_2*xi*beta_3 + pow(nu_der_1,2)*xi*(2 + beta_3) + xi*beta_der2_3 + 2*nu_der_1*xi*beta_der_3))))/((1 + n)*pow(xi,3)*pow(Omega,2));
 //----------------------
-//----------------------
-//===========================================================================================
-//-----------------------A matrix, its derivative and B matrix-------------------------------
-//===========================================================================================
-//----------------------
-Eigen::MatrixXd A(4,4);
+//---------------------------
+double S_Omega =  -0.08333333333333333*(brel*pow(E,(-lambda - nu)/2.)*(1 + n)*xi*Omega*feta*H00*(2*alphaW_0 + brel*pow(E,lambda/2.)*xi*(2 + alpha_0)))/Pi - (brel*pow(E,(-lambda - nu)/2.)*(1 + n)*Omega*feta*W0*(-4 + 2*l + 2*xi*alphaW_1 + brel*pow(E,lambda/2.)*pow(xi,2)*alpha_1))/(12.*Pi) + (brel*(1 + n)*Omega*feta*V0*(l + pow(l,2) - (2*xi*alphaW_2)/pow(E,lambda/2.) - brel*pow(xi,2)*alpha_2))/(12.*pow(E,nu/2.)*Pi) + (brel*(1 + n)*xi*Omega*feta*H00der*((-2*alphaW_3)/pow(E,lambda/2.) - brel*xi*alpha_3))/(12.*pow(E,nu/2.)*Pi) ; 
 
-A(0,0) = 0.; A(0,1) = 0.; A(0,2) = 0.; A(0,3) = 1.;
+double S_Omega_der =  -0.041666666666666664*(brel*pow(E,(-lambda - nu)/2.)*(1 + n)*Omega*H00*(2*theta_der_1*xi*feta_der*(2*alphaW_0 + brel*pow(E,lambda/2.)*xi*(2 + alpha_0)) + feta*(4*xi*alphaV_0*alphaW_2 + 2*alphaW_0*(-2 + 2*l - lambda_der_1*xi - nu_der_1*xi + 2*xi*alphaW_1 + brel*pow(E,lambda/2.)*pow(xi,2)*alpha_1) - 2*pow(E,lambda/2.)*alphaV_0*(l + pow(l,2) - brel*pow(xi,2)*alpha_2) + xi*(8*brel*pow(E,lambda/2.) - 2*brel*pow(E,lambda/2.)*nu_der_1*xi + 4*alphaW_der_0 - brel*pow(E,lambda/2.)*(-4 + nu_der_1*xi)*alpha_0 + 2*alphaH_0*(2*alphaW_3 + brel*pow(E,lambda/2.)*xi*alpha_3) + 2*brel*pow(E,lambda/2.)*xi*alpha_der_0))))/Pi - (brel*pow(E,(-lambda - nu)/2.)*(1 + n)*Omega*W0*(2*theta_der_1*feta_der*(-4 + 2*l + 2*xi*alphaW_1 + brel*pow(E,lambda/2.)*pow(xi,2)*alpha_1) + feta*(4*lambda_der_1 - 2*l*lambda_der_1 + 4*nu_der_1 - 2*l*nu_der_1 + 4*xi*pow(alphaW_1,2) + 4*xi*alphaV_1*alphaW_2 + 4*xi*alphaH_1*alphaW_3 + 4*xi*alphaW_der_1 + 4*brel*pow(E,lambda/2.)*xi*alpha_1 - brel*pow(E,lambda/2.)*nu_der_1*pow(xi,2)*alpha_1 + 2*alphaW_1*(-2 + 2*l - lambda_der_1*xi - nu_der_1*xi + brel*pow(E,lambda/2.)*pow(xi,2)*alpha_1) - 2*pow(E,lambda/2.)*alphaV_1*(l + pow(l,2) - brel*pow(xi,2)*alpha_2) + 2*brel*pow(E,lambda/2.)*pow(xi,2)*alphaH_1*alpha_3 + 2*brel*pow(E,lambda/2.)*pow(xi,2)*alpha_der_1)))/(24.*Pi) - (brel*pow(E,(-lambda - nu)/2.)*(1 + n)*Omega*V0*(-2*theta_der_1*feta_der*(-2*xi*alphaW_2 + pow(E,lambda/2.)*(l + pow(l,2) - brel*pow(xi,2)*alpha_2)) + feta*(pow(E,lambda/2.)*l*nu_der_1 + pow(E,lambda/2.)*pow(l,2)*nu_der_1 + 4*xi*alphaV_2*alphaW_2 + 4*xi*alphaH_2*alphaW_3 + 4*xi*alphaW_der_2 + 2*alphaW_2*(-2 + 2*l - lambda_der_1*xi - nu_der_1*xi + 2*xi*alphaW_1 + brel*pow(E,lambda/2.)*pow(xi,2)*alpha_1) + 4*brel*pow(E,lambda/2.)*xi*alpha_2 - brel*pow(E,lambda/2.)*nu_der_1*pow(xi,2)*alpha_2 - 2*pow(E,lambda/2.)*alphaV_2*(l + pow(l,2) - brel*pow(xi,2)*alpha_2) + 2*brel*pow(E,lambda/2.)*pow(xi,2)*alphaH_2*alpha_3 + 2*brel*pow(E,lambda/2.)*pow(xi,2)*alpha_der_2)))/(24.*Pi) - (brel*pow(E,(-lambda - nu)/2.)*(1 + n)*Omega*H00der*(2*theta_der_1*xi*feta_der*(2*alphaW_3 + brel*pow(E,lambda/2.)*xi*alpha_3) + feta*(4*brel*pow(E,lambda/2.)*pow(xi,2) + 4*xi*alphaW_0 + 4*xi*alphaV_3*alphaW_2 - 4*alphaW_3 + 4*l*alphaW_3 - 2*lambda_der_1*xi*alphaW_3 - 2*nu_der_1*xi*alphaW_3 + 4*xi*alphaH_3*alphaW_3 + 4*xi*alphaW_1*alphaW_3 + 4*xi*alphaW_der_3 + 2*brel*pow(E,lambda/2.)*pow(xi,2)*alpha_0 + 2*brel*pow(E,lambda/2.)*pow(xi,2)*alphaW_3*alpha_1 - 2*pow(E,lambda/2.)*alphaV_3*(l + pow(l,2) - brel*pow(xi,2)*alpha_2) + 4*brel*pow(E,lambda/2.)*xi*alpha_3 - brel*pow(E,lambda/2.)*nu_der_1*pow(xi,2)*alpha_3 + 2*brel*pow(E,lambda/2.)*pow(xi,2)*alphaH_3*alpha_3 + 2*brel*pow(E,lambda/2.)*pow(xi,2)*alpha_der_3)))/(24.*Pi) ; 
 
-A(1,0) = alphaW_0; A(1,1) = alphaW_1; A(1,2) = alphaW_2; A(1,3) = alphaW_3; 
+//---------------------------
+//---------------------------
+double SZ =  -0.5*(brel*(1 + n)*Omega*feta*V0)/(pow(E,nu/2.)*Pi) ; 
 
-A(2,0) = alphaV_0; A(2,1) = alphaV_1; A(2,2) = alphaV_2; A(2,3) = alphaV_3; 
+double SZ_der =  -0.5*(brel*(1 + n)*Omega*feta*H00*alphaV_0)/(pow(E,nu/2.)*Pi) - (brel*(1 + n)*Omega*feta*W0*alphaV_1)/(2.*pow(E,nu/2.)*Pi) - (brel*(1 + n)*Omega*V0*(2*theta_der_1*feta_der + feta*(-nu_der_1 + 2*alphaV_2)))/(4.*pow(E,nu/2.)*Pi) - (brel*(1 + n)*Omega*feta*H00der*alphaV_3)/(2.*pow(E,nu/2.)*Pi) ; 
 
-A(3,0) = alphaH_0; A(3,1) = alphaH_1; A(3,2) = alphaH_2; A(3,3) = alphaH_3; 
-//----------------------
-Eigen::MatrixXd A_der(4,4);
+//---------------------------
+//---------------------------
+double S_1 =  -0.25*(brel*(1 + n)*xi*Omega*feta*H00*alphaV_0)/(pow(E,nu/2.)*Pi) + (brel*(1 + n)*Omega*feta*W0*(pow(E,lambda/2.) - xi*alphaV_1))/(4.*pow(E,nu/2.)*Pi) - (brel*(1 + n)*Omega*feta*V0*(-2 + l + xi*alphaV_2))/(4.*pow(E,nu/2.)*Pi) - (brel*(1 + n)*xi*Omega*feta*H00der*alphaV_3)/(4.*pow(E,nu/2.)*Pi) ; 
 
-A_der(0,0) = 0.; A_der(0,1) = 0.; A_der(0,2) = 0.; A_der(0,3) = 0.;
+double S_1_der =  -0.125*(brel*(1 + n)*Omega*H00*(2*theta_der_1*xi*feta_der*alphaV_0 + feta*(alphaV_0*(-2 + 2*l - nu_der_1*xi + 2*xi*alphaV_2) + 2*(xi*alphaH_0*alphaV_3 + xi*alphaV_der_0 - pow(E,lambda/2.)*alphaW_0 + xi*alphaV_1*alphaW_0))))/(pow(E,nu/2.)*Pi) + (brel*(1 + n)*Omega*W0*(2*theta_der_1*feta_der*(pow(E,lambda/2.) - xi*alphaV_1) + feta*(pow(E,lambda/2.)*lambda_der_1 - pow(E,lambda/2.)*nu_der_1 - 2*xi*alphaH_1*alphaV_3 - 2*xi*alphaV_der_1 + 2*pow(E,lambda/2.)*alphaW_1 + alphaV_1*(2 - 2*l + nu_der_1*xi - 2*xi*alphaV_2 - 2*xi*alphaW_1))))/(8.*pow(E,nu/2.)*Pi) - (brel*(1 + n)*Omega*V0*(2*theta_der_1*feta_der*(-2 + l + xi*alphaV_2) + feta*(2*nu_der_1 - l*nu_der_1 + (-2 + 2*l - nu_der_1*xi)*alphaV_2 + 2*xi*pow(alphaV_2,2) + 2*xi*alphaH_2*alphaV_3 + 2*xi*alphaV_der_2 - 2*pow(E,lambda/2.)*alphaW_2 + 2*xi*alphaV_1*alphaW_2)))/(8.*pow(E,nu/2.)*Pi) - (brel*(1 + n)*Omega*H00der*(2*theta_der_1*xi*feta_der*alphaV_3 + feta*(2*xi*alphaV_0 + (-2 + 2*l - nu_der_1*xi + 2*xi*alphaH_3 + 2*xi*alphaV_2)*alphaV_3 + 2*xi*alphaV_der_3 - 2*pow(E,lambda/2.)*alphaW_3 + 2*xi*alphaV_1*alphaW_3)))/(8.*pow(E,nu/2.)*Pi) ; 
 
-A_der(1,0) = alphaW_der_0; A_der(1,1) = alphaW_der_1; A_der(1,2) = alphaW_der_2; A_der(1,3) = alphaW_der_3; 
+double S_1_der2 =  -0.0625*(brel*(1 + n)*Omega*H00*(4*alphaV_0*(pow(theta_der_1,2)*xi*feta_der_2 + feta_der*(theta_der_2*xi + theta_der_1*(-2 + 2*l - nu_der_1*xi + 2*xi*alphaV_2))) + 8*theta_der_1*feta_der*(xi*alphaH_0*alphaV_3 + xi*alphaV_der_0 + (-pow(E,lambda/2.) + xi*alphaV_1)*alphaW_0) + feta*(alphaV_0*(4*nu_der_1 - 4*l*nu_der_1 + pow(nu_der_1,2)*xi - 2*nu_der_2*xi + 4*(l - nu_der_1*xi)*alphaV_2 + 4*xi*pow(alphaV_2,2) + 4*xi*alphaH_2*alphaV_3 + 8*xi*alphaV_der_2 - 4*pow(E,lambda/2.)*alphaW_2 + 4*xi*alphaV_1*alphaW_2) + 4*alphaH_0*(xi*alphaV_0 + (l - nu_der_1*xi + xi*alphaH_3 + xi*alphaV_2)*alphaV_3 + 2*xi*alphaV_der_3 - pow(E,lambda/2.)*alphaW_3 + xi*alphaV_1*alphaW_3) + 4*(xi*alphaH_der_0*alphaV_3 + xi*alphaV_der2_0 + l*alphaV_der_0 - nu_der_1*xi*alphaV_der_0 + xi*alphaV_2*alphaV_der_0 - pow(E,lambda/2.)*lambda_der_1*alphaW_0 + pow(E,lambda/2.)*nu_der_1*alphaW_0 + xi*alphaH_1*alphaV_3*alphaW_0 + 2*xi*alphaV_der_1*alphaW_0 - pow(E,lambda/2.)*alphaW_0*alphaW_1 - pow(E,lambda/2.)*alphaW_der_0 + alphaV_1*(alphaW_0*(l - nu_der_1*xi + xi*alphaV_2 + xi*alphaW_1) + xi*alphaW_der_0)))))/(pow(E,nu/2.)*Pi) - (brel*(1 + n)*Omega*W0*(4*(-(pow(E,lambda/2.)*lambda_der_1*theta_der_1*feta_der) + pow(E,lambda/2.)*nu_der_1*theta_der_1*feta_der - pow(E,lambda/2.)*theta_der_2*feta_der - pow(E,lambda/2.)*pow(theta_der_1,2)*feta_der_2 + 2*theta_der_1*xi*feta_der*alphaH_1*alphaV_3 + 2*theta_der_1*xi*feta_der*alphaV_der_1 - 2*pow(E,lambda/2.)*theta_der_1*feta_der*alphaW_1 + alphaV_1*(pow(theta_der_1,2)*xi*feta_der_2 + feta_der*(theta_der_2*xi + theta_der_1*(-2 + 2*l - nu_der_1*xi + 2*xi*alphaV_2 + 2*xi*alphaW_1)))) + feta*(-(pow(E,lambda/2.)*pow(lambda_der_1,2)) - 2*pow(E,lambda/2.)*lambda_der_2 + 2*pow(E,lambda/2.)*lambda_der_1*nu_der_1 - pow(E,lambda/2.)*pow(nu_der_1,2) + 2*pow(E,lambda/2.)*nu_der_2 + 4*xi*alphaH_der_1*alphaV_3 + 4*xi*alphaV_der2_1 + 4*l*alphaV_der_1 - 4*nu_der_1*xi*alphaV_der_1 + 4*xi*alphaV_2*alphaV_der_1 - 4*pow(E,lambda/2.)*lambda_der_1*alphaW_1 + 4*pow(E,lambda/2.)*nu_der_1*alphaW_1 + 8*xi*alphaV_der_1*alphaW_1 - 4*pow(E,lambda/2.)*pow(alphaW_1,2) + 4*xi*pow(alphaV_1,2)*alphaW_2 + 4*alphaH_1*(xi*alphaV_0 + 2*xi*alphaV_der_3 + alphaV_3*(l - nu_der_1*xi + xi*alphaH_3 + xi*alphaV_2 + xi*alphaW_1) - pow(E,lambda/2.)*alphaW_3 + xi*alphaV_1*alphaW_3) - 4*pow(E,lambda/2.)*alphaW_der_1 + alphaV_1*(4*nu_der_1 - 4*l*nu_der_1 + pow(nu_der_1,2)*xi - 2*nu_der_2*xi + 4*xi*pow(alphaV_2,2) + 4*xi*alphaH_2*alphaV_3 + 8*xi*alphaV_der_2 + 4*l*alphaW_1 - 4*nu_der_1*xi*alphaW_1 + 4*xi*pow(alphaW_1,2) + 4*alphaV_2*(l - nu_der_1*xi + xi*alphaW_1) - 4*pow(E,lambda/2.)*alphaW_2 + 4*xi*alphaW_der_1))))/(16.*pow(E,nu/2.)*Pi) - (brel*(1 + n)*Omega*V0*(4*(2*nu_der_1*theta_der_1*feta_der - l*nu_der_1*theta_der_1*feta_der - 2*theta_der_2*feta_der + l*theta_der_2*feta_der - 2*pow(theta_der_1,2)*feta_der_2 + l*pow(theta_der_1,2)*feta_der_2 + ((theta_der_2*xi + theta_der_1*(-2 + 2*l - nu_der_1*xi))*feta_der + pow(theta_der_1,2)*xi*feta_der_2)*alphaV_2 + 2*theta_der_1*xi*feta_der*pow(alphaV_2,2) + 2*theta_der_1*xi*feta_der*alphaH_2*alphaV_3 + 2*theta_der_1*xi*feta_der*alphaV_der_2 - 2*pow(E,lambda/2.)*theta_der_1*feta_der*alphaW_2 + 2*theta_der_1*xi*feta_der*alphaV_1*alphaW_2) + feta*(-2*pow(nu_der_1,2) + l*pow(nu_der_1,2) + 4*nu_der_2 - 2*l*nu_der_2 + 4*(l - nu_der_1*xi)*pow(alphaV_2,2) + 4*xi*pow(alphaV_2,3) + 4*xi*alphaH_der_2*alphaV_3 + 4*xi*alphaV_der2_2 + 4*l*alphaV_der_2 - 4*nu_der_1*xi*alphaV_der_2 - 4*pow(E,lambda/2.)*lambda_der_1*alphaW_2 + 4*pow(E,lambda/2.)*nu_der_1*alphaW_2 + 4*l*alphaV_1*alphaW_2 - 4*nu_der_1*xi*alphaV_1*alphaW_2 + 4*xi*alphaH_1*alphaV_3*alphaW_2 + 8*xi*alphaV_der_1*alphaW_2 - 4*pow(E,lambda/2.)*alphaW_1*alphaW_2 + 4*xi*alphaV_1*alphaW_1*alphaW_2 + alphaV_2*(4*nu_der_1 - 4*l*nu_der_1 + pow(nu_der_1,2)*xi - 2*nu_der_2*xi + 12*xi*alphaV_der_2 - 4*(pow(E,lambda/2.) - 2*xi*alphaV_1)*alphaW_2) + 4*alphaH_2*(xi*alphaV_0 + (l - nu_der_1*xi + xi*alphaH_3 + 2*xi*alphaV_2)*alphaV_3 + 2*xi*alphaV_der_3 - pow(E,lambda/2.)*alphaW_3 + xi*alphaV_1*alphaW_3) - 4*pow(E,lambda/2.)*alphaW_der_2 + 4*xi*alphaV_1*alphaW_der_2)))/(16.*pow(E,nu/2.)*Pi) - (brel*(1 + n)*Omega*H00der*(8*theta_der_1*xi*feta_der*alphaV_0 + 4*(pow(theta_der_1,2)*xi*feta_der_2 + feta_der*(theta_der_2*xi + theta_der_1*(-2 + 2*l - nu_der_1*xi + 2*xi*alphaH_3 + 2*xi*alphaV_2)))*alphaV_3 - 8*theta_der_1*feta_der*(-(xi*alphaV_der_3) + (pow(E,lambda/2.) - xi*alphaV_1)*alphaW_3) + feta*(4*alphaV_0*(l - nu_der_1*xi + xi*alphaH_3 + xi*alphaV_2) + 4*nu_der_1*alphaV_3 - 4*l*nu_der_1*alphaV_3 + pow(nu_der_1,2)*xi*alphaV_3 - 2*nu_der_2*xi*alphaV_3 + 4*xi*alphaH_0*alphaV_3 + 4*l*alphaH_3*alphaV_3 - 4*nu_der_1*xi*alphaH_3*alphaV_3 + 4*xi*pow(alphaH_3,2)*alphaV_3 + 4*xi*alphaH_der_3*alphaV_3 + 4*l*alphaV_2*alphaV_3 - 4*nu_der_1*xi*alphaV_2*alphaV_3 + 4*xi*alphaH_3*alphaV_2*alphaV_3 + 4*xi*pow(alphaV_2,2)*alphaV_3 + 4*xi*alphaH_2*pow(alphaV_3,2) + 4*xi*alphaV_der2_3 + 8*xi*alphaV_der_0 + 8*xi*alphaV_3*alphaV_der_2 + 4*l*alphaV_der_3 - 4*nu_der_1*xi*alphaV_der_3 + 8*xi*alphaH_3*alphaV_der_3 + 4*xi*alphaV_2*alphaV_der_3 - 4*pow(E,lambda/2.)*alphaW_0 + 4*xi*alphaV_1*alphaW_0 - 4*pow(E,lambda/2.)*alphaV_3*alphaW_2 + 4*xi*alphaV_1*alphaV_3*alphaW_2 - 4*pow(E,lambda/2.)*lambda_der_1*alphaW_3 + 4*pow(E,lambda/2.)*nu_der_1*alphaW_3 - 4*pow(E,lambda/2.)*alphaH_3*alphaW_3 + 4*l*alphaV_1*alphaW_3 - 4*nu_der_1*xi*alphaV_1*alphaW_3 + 4*xi*alphaH_3*alphaV_1*alphaW_3 + 4*xi*alphaV_1*alphaV_2*alphaW_3 + 4*xi*alphaH_1*alphaV_3*alphaW_3 + 8*xi*alphaV_der_1*alphaW_3 - 4*pow(E,lambda/2.)*alphaW_1*alphaW_3 + 4*xi*alphaV_1*alphaW_1*alphaW_3 - 4*pow(E,lambda/2.)*alphaW_der_3 + 4*xi*alphaV_1*alphaW_der_3)))/(16.*pow(E,nu/2.)*Pi) ; 
 
-A_der(2,0) = alphaV_der_0; A_der(2,1) = alphaV_der_1; A_der(2,2) = alphaV_der_2; A_der(2,3) = alphaV_der_3; 
-
-A_der(3,0) = alphaH_der_0; A_der(3,1) = alphaH_der_1; A_der(3,2) = alphaH_der_2; A_der(3,3) = alphaH_der_3; 
-//===========================================================
-Eigen::MatrixXd B(4,9);
-
-for(int i=0; i<9; ++i){B(0,i) = 0.;}
-
-//----------------------
-B(1,0) = alphaV_3 ;
-B(1,1) = alphaV_4 ;
-B(1,2) = alphaV_5 ;
-B(1,3) = alphaV_6 ;
-B(1,4) = alphaV_7 ;
-B(1,5) = alphaV_8 ;
-B(1,6) = alphaV_9 ;
-B(1,7) = alphaV_10 ;
-B(1,8) = alphaV_11 ;
-B(1,9) = alphaV_12 ;
-//----------------------
-//----------------------
-B(1,0) = alphaW_4 ;
-B(1,1) = alphaW_5 ;
-B(1,2) = alphaW_6 ;
-B(1,3) = alphaW_7 ;
-B(1,4) = 0. ;
-B(1,5) = alphaW_9 ;
-//----------------------
-//----------------------
-B(3,0) = alphaH_3 ;
-B(3,1) = alphaH_4 ;
-B(3,2) = alphaH_5 ;
-B(3,3) = alphaH_6 ;
-B(3,4) = alphaH_7 ;
-B(3,5) = alphaH_8 ;
-B(3,6) = alphaH_9 ;
-B(3,7) = alphaH_10 ;
-B(3,8) = alphaH_11 ;
-B(3,9) = alphaH_12 ;
-//----------------------
-//===========================================================
-//===========================================================================================
-//-----------------------Sigma matrices, and their derivatives-------------------------------
-//===========================================================================================
-//---------------------------------
-Eigen::VectorXd Sigma_Omega(4) ;
-Eigen::VectorXd Sigma_Omega_der(4) ;
-Sigma_Omega[0] = -0.08333333333333333*(brel*pow(E,(-lambda - nu)/2.)*(1 + n)*xi*Omega*(2*alphaW_0 + brel*pow(E,lambda/2.)*xi*(2 + alpha_0)))/Pi ; 
-Sigma_Omega_der[0] = (brel*pow(E,(-lambda - nu)/2.)*(1 + n)*Omega*(2*(-2 + lambda_der_1*xi + nu_der_1*xi)*alphaW_0 + xi*(-4*alphaW_der_0 + brel*pow(E,lambda/2.)*(-4 + nu_der_1*xi)*alpha_0 - 2*brel*pow(E,lambda/2.)*(4 - nu_der_1*xi + xi*alpha_der_0))))/(24.*Pi) ; 
-Sigma_Omega[1] = (brel*pow(E,(-lambda - nu)/2.)*(1 + n)*Omega*(3 + pow(E,lambda) - 2*l + xi*(-2*alphaW_1 - brel*pow(E,lambda/2.)*xi*alpha_1 + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*xi*pow(theta,1 + n))))/(12.*Pi) ; 
-Sigma_Omega_der[1] = (brel*pow(E,(-lambda - nu)/2.)*(1 + n)*Omega*(2*pow(E,lambda)*lambda_der_1 - 4*alphaW_1 - 4*xi*alphaW_der_1 - 4*brel*pow(E,lambda/2.)*xi*alpha_1 - brel*pow(E,lambda/2.)*lambda_der_1*pow(xi,2)*alpha_1 - 2*brel*pow(E,lambda/2.)*pow(xi,2)*alpha_der_1 + 4*pow(brel,2)*pow(E,lambda)*pow(1 + n,2)*theta_der_1*pow(xi,2)*pow(theta,n) + 8*pow(brel,2)*pow(E,lambda)*(1 + n)*xi*pow(theta,1 + n) + 4*pow(brel,2)*pow(E,lambda)*lambda_der_1*(1 + n)*pow(xi,2)*pow(theta,1 + n) + (-lambda_der_1 - nu_der_1)*(3 + pow(E,lambda) - 2*l + xi*(-2*alphaW_1 - brel*pow(E,lambda/2.)*xi*alpha_1 + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*xi*pow(theta,1 + n)))))/(24.*Pi) ; 
-Sigma_Omega[2] = (brel*(1 + n)*Omega*(l + pow(l,2) - (2*xi*alphaW_2)/pow(E,lambda/2.) - brel*pow(xi,2)*alpha_2))/(12.*pow(E,nu/2.)*Pi) ; 
-Sigma_Omega_der[2] = -0.041666666666666664*(brel*pow(E,(-lambda - nu)/2.)*(1 + n)*Omega*(pow(E,lambda/2.)*l*nu_der_1 + pow(E,lambda/2.)*pow(l,2)*nu_der_1 - 2*(-2 + lambda_der_1*xi + nu_der_1*xi)*alphaW_2 + 4*xi*alphaW_der_2 - brel*pow(E,lambda/2.)*xi*(-4 + nu_der_1*xi)*alpha_2 + 2*brel*pow(E,lambda/2.)*pow(xi,2)*alpha_der_2))/Pi ; 
-Sigma_Omega[3] = (brel*(1 + n)*xi*Omega*((-2*alphaW_3)/pow(E,lambda/2.) - brel*xi*alpha_3))/(12.*pow(E,nu/2.)*Pi) ; 
-Sigma_Omega_der[3] = (brel*pow(E,(-lambda - nu)/2.)*(1 + n)*Omega*(2*(-2 + lambda_der_1*xi + nu_der_1*xi)*alphaW_3 + brel*pow(E,lambda/2.)*xi*(-4 + nu_der_1*xi)*alpha_3 - 2*xi*(2*alphaW_der_3 + brel*pow(E,lambda/2.)*xi*alpha_der_3)))/(24.*Pi) ; 
-//---------------------------------
-//---------------------------------
-Eigen::VectorXd Sigma_Z(4) ;
-Eigen::VectorXd Sigma_Z_der(4) ;
-Sigma_Z[0] = 0 ; 
-Sigma_Z_der[0] = 0 ; 
-Sigma_Z[1] = 0 ; 
-Sigma_Z_der[1] = 0 ; 
-Sigma_Z[2] = -0.5*(brel*(1 + n)*Omega)/(pow(E,nu/2.)*Pi) ; 
-Sigma_Z_der[2] = (brel*(1 + n)*nu_der_1*Omega)/(4.*pow(E,nu/2.)*Pi) ; 
-Sigma_Z[3] = 0 ; 
-Sigma_Z_der[3] = 0 ; 
-//---------------------------------
-//---------------------------------
-Eigen::VectorXd Sigma_1(4) ;
-Eigen::VectorXd Sigma_1_der(4) ;
-Eigen::VectorXd Sigma_1_der2(4) ;
-Sigma_1[0] = -0.25*(brel*(1 + n)*xi*Omega*alphaV_0)/(pow(E,nu/2.)*Pi) ; 
-Sigma_1_der[0] = (brel*(1 + n)*Omega*((-2 + nu_der_1*xi)*alphaV_0 - 2*xi*alphaV_der_0))/(8.*pow(E,nu/2.)*Pi) ; 
-Sigma_1_der2[0] = (brel*(1 + n)*Omega*((4*nu_der_1 - pow(nu_der_1,2)*xi + 2*nu_der_2*xi)*alphaV_0 - 4*xi*alphaV_der2_0 + 4*(-2 + nu_der_1*xi)*alphaV_der_0))/(16.*pow(E,nu/2.)*Pi) ; 
-Sigma_1[1] = (brel*(1 + n)*Omega*(pow(E,lambda/2.) - xi*alphaV_1))/(4.*pow(E,nu/2.)*Pi) ; 
-Sigma_1_der[1] = (brel*(1 + n)*Omega*(pow(E,lambda/2.)*(lambda_der_1 - nu_der_1) + (-2 + nu_der_1*xi)*alphaV_1 - 2*xi*alphaV_der_1))/(8.*pow(E,nu/2.)*Pi) ; 
-Sigma_1_der2[1] = (brel*(1 + n)*Omega*(pow(E,lambda/2.)*pow(lambda_der_1,2) + 2*pow(E,lambda/2.)*lambda_der_2 - 2*pow(E,lambda/2.)*lambda_der_1*nu_der_1 + pow(E,lambda/2.)*pow(nu_der_1,2) - 2*pow(E,lambda/2.)*nu_der_2 + 4*nu_der_1*alphaV_1 - pow(nu_der_1,2)*xi*alphaV_1 + 2*nu_der_2*xi*alphaV_1 - 4*xi*alphaV_der2_1 + 4*(-2 + nu_der_1*xi)*alphaV_der_1))/(16.*pow(E,nu/2.)*Pi) ; 
-Sigma_1[2] = (brel*(1 + n)*Omega*(3 + pow(E,lambda) - 2*l - 2*xi*alphaV_2 + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*pow(xi,2)*pow(theta,1 + n)))/(8.*pow(E,nu/2.)*Pi) ; 
-Sigma_1_der[2] = (brel*(1 + n)*Omega*(2*pow(E,lambda)*lambda_der_1 - 3*nu_der_1 - pow(E,lambda)*nu_der_1 + 2*l*nu_der_1 + 2*(-2 + nu_der_1*xi)*alphaV_2 - 4*xi*alphaV_der_2 + 4*pow(brel,2)*pow(E,lambda)*pow(1 + n,2)*theta_der_1*pow(xi,2)*pow(theta,n) + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*xi*(4 + 2*lambda_der_1*xi - nu_der_1*xi)*pow(theta,1 + n)))/(16.*pow(E,nu/2.)*Pi) ; 
-Sigma_1_der2[2] = (brel*(1 + n)*Omega*((4*pow(E,lambda)*pow(lambda_der_1,2) + 4*pow(E,lambda)*lambda_der_2 - 4*pow(E,lambda)*lambda_der_1*nu_der_1 + 3*pow(nu_der_1,2) + pow(E,lambda)*pow(nu_der_1,2) - 2*l*pow(nu_der_1,2) - 6*nu_der_2 - 2*pow(E,lambda)*nu_der_2 + 4*l*nu_der_2 + 8*nu_der_1*alphaV_2 - 2*pow(nu_der_1,2)*xi*alphaV_2 + 4*nu_der_2*xi*alphaV_2 - 8*xi*alphaV_der2_2 + 8*(-2 + nu_der_1*xi)*alphaV_der_2)*theta + 8*pow(brel,2)*pow(E,lambda)*n*pow(1 + n,2)*pow(theta_der_1,2)*pow(xi,2)*pow(theta,n) + 8*pow(brel,2)*pow(E,lambda)*pow(1 + n,2)*xi*(theta_der_2*xi + theta_der_1*(4 + 2*lambda_der_1*xi - nu_der_1*xi))*pow(theta,1 + n) + 2*pow(brel,2)*pow(E,lambda)*(1 + n)*(8 - 8*nu_der_1*xi + 4*pow(lambda_der_1,2)*pow(xi,2) + 4*lambda_der_2*pow(xi,2) + pow(nu_der_1,2)*pow(xi,2) - 2*nu_der_2*pow(xi,2) - 4*lambda_der_1*xi*(-4 + nu_der_1*xi))*pow(theta,2 + n)))/(32.*pow(E,nu/2.)*Pi*theta) ; 
-Sigma_1[3] = -0.25*(brel*(1 + n)*xi*Omega*alphaV_3)/(pow(E,nu/2.)*Pi) ; 
-Sigma_1_der[3] = (brel*(1 + n)*Omega*((-2 + nu_der_1*xi)*alphaV_3 - 2*xi*alphaV_der_3))/(8.*pow(E,nu/2.)*Pi) ; 
-Sigma_1_der2[3] = (brel*(1 + n)*Omega*((4*nu_der_1 - pow(nu_der_1,2)*xi + 2*nu_der_2*xi)*alphaV_3 - 4*xi*alphaV_der2_3 + 4*(-2 + nu_der_1*xi)*alphaV_der_3))/(16.*pow(E,nu/2.)*Pi) ; 
-//---------------------------------
-//----------------------
-//===========================================================================================
-//-----------------------Sources-------------------------------
-//===========================================================================================
-//----------------------
-Eigen::VectorXd Yvec0(4);
-Yvec0 << H00, W0, V0, H00der;
-
-double S_Omega = feta*(Sigma_Omega.transpose()*Yvec0).value();
-double S_Z = feta*(Sigma_Z.transpose()*Yvec0).value();
-double S_1 = feta*(Sigma_1.transpose()*Yvec0).value();
+//---------------------------
 double S_0 = -2*pow(E,lambda)*S_Omega;
-
-double S_Omega_der = (feta_der/feta)*(S_Omega) + feta*((Sigma_Omega_der.transpose()*Yvec0).value() + (Sigma_Omega.transpose()*A*Yvec0).value()) ;
-double S_Z_der = (feta_der/feta)*(S_Z) + feta*((Sigma_Z_der.transpose()*Yvec0).value() + (Sigma_Z.transpose()*A*Yvec0).value()) ;
-double S_1_der = (feta_der/feta)*(S_1) + feta*((Sigma_1_der.transpose()*Yvec0).value() + (Sigma_1.transpose()*A*Yvec0).value()) ;
 double S_0_der = -2*pow(E,lambda)*lambda_der_1*S_Omega - 2*pow(E,lambda)*S_Omega_der;
-
-double S_1_der2 = (feta_der_2/feta - 2.0*pow(feta_der/feta,2.0))*(S_1) + 2.0*(feta_der/feta)*(S_1_der) 
-+ feta_der*(Sigma_1_der2.transpose()*Yvec0 + 2.0*(Sigma_1_der.transpose()*A*Yvec0) + Sigma_1.transpose()*A_der*Yvec0 + Sigma_1.transpose()*A*A*Yvec0).value() ;
-
 //----------------------
-Eigen::VectorXd source_vec(9);
+cout<<"S_Omega = "<<S_Omega<<endl;
+cout<<"S_Omega_der = "<<S_Omega_der<<endl;
+cout<<"SZ = "<<SZ<<endl;
+cout<<"SZ_der = "<<SZ_der<<endl;
+cout<<"S1 = "<<S_1<<endl;
+cout<<"S1_der = "<<S_1_der<<endl;
+cout<<"S1_der2 = "<<S_1_der2<<endl;
+cout<<"S0= "<<S_0<<endl;
+cout<<"S0_der= "<<S_0_der<<endl;
+double H0 = y[0], W = y[1], V = y[2], H1 = y[3];
 
-source_vec << S_0,S_1,S_Z,S_Omega,S_0_der,S_1_der,S_Z_der,S_Omega_der,S_1_der2 ;
-Eigen::Vector4d yeigen(y.data());
+cout<<"y = "<<endl;
 
-yeigen = A*yeigen +  B*source_vec;
+out_put_vec(y);
 
-for(int i=0; i<4; ++i) {
-dydx[i] = yeigen[i] ;
-}
-//----------------------
+dydx[0] = H1;
 
+dydx[1] = H0*alphaW_0 + W*alphaW_1 + V*alphaW_2 + H1*alphaW_3 + S_0*alphaW_4 + S_1*alphaW_5 + SZ*alphaW_6 + S_Omega*alphaW_7 + S_1_der*alphaW_9;
+
+dydx[2] = H0*alphaV_0 + W*alphaV_1 + V*alphaV_2 + H1*alphaV_3 + S_0*alphaV_4 + S_1*alphaV_5 + SZ*alphaV_6 + S_Omega*alphaV_7 + S_0_der*alphaV_8 + S_1_der*alphaV_9 + SZ_der*alphaV_10 + S_Omega_der*alphaV_11 + S_1_der2*alphaV_12   ;
+
+dydx[3] = H0*alphaH_0 + W*alphaH_1 + V*alphaH_2 + H1*alphaH_3 + S_0*alphaH_4 + S_1*alphaH_5 + SZ*alphaH_6 + S_Omega*alphaH_7 + S_0_der*alphaH_8 + S_1_der*alphaH_9 + SZ_der*alphaH_10 + S_Omega_der*alphaH_11 + S_1_der2*alphaH_12    ;
+
+cout<<"dydx not regularized"<<endl;
+out_put_vec(dydx);
+
+//---------------------------------
+dydx[0] = H1;
+
+dydx[1] = H0*alphaW_0 + W*alphaW_1 + V*alphaW_2 + H1*alphaW_3 ;
+dydx[1] += (4*Pi*S_1_der*pow(theta,-1 - n))/(brel*pow(E,lambda/2.)*(1 + n)*gamma_0*(1 + brel*theta)) + ((-2*pow(E,lambda)*(-2 + l + pow(l,2))*Pi*SZ + 4*Pi*((pow(E,lambda) + l)*S_1 + pow(E,lambda)*S_Omega))*pow(theta,-1 - n))/(brel*pow(E,lambda/2.)*(1 + n)*gamma_0*xi*(1 + brel*theta)) + pow(E,lambda/2.)*xi*(brel*(S_0*alpha_4 + SZ*(8*Pi + alpha_6) + S_Omega*alpha_7 + S_1_der*alpha_9) + (S_1*(-4*Pi + brel*(4*Pi + gamma_0*alpha_5)*theta + pow(brel,2)*gamma_0*alpha_5*pow(theta,2)))/(gamma_0*theta*(1 + brel*theta)));
+
+
+dydx[2] = H0*alphaV_0 + W*alphaV_1 + V*alphaV_2 + H1*alphaV_3 ;
+dydx[2] += (4*brel*pow(E,lambda + nu)*Pi*xi*S_1*pow(theta,n)*(1 + n - n*gamma_0 + brel*(-1 + n*(-1 + gamma_0) + 2*gamma_0)*theta))/((1 + n)*gamma_0*pow(Omega,2)*(1 + brel*theta)) + (2*pow(E,-lambda + nu)*Pi*pow(theta,-1 - n)*(-((-1 + pow(E,lambda))*S_1_der) + brel*gamma_0*(pow(E,lambda)*(-2 + l + pow(l,2))*SZ_der + 2*S_0_der + 5*S_1_der - 5*pow(E,lambda)*S_1_der - 4*l*S_1_der - 2*pow(E,lambda)*S_Omega_der)*theta))/(pow(brel,2)*pow(1 + n,2)*pow(xi,2)*pow(Omega,2)*(gamma_0 + brel*gamma_0*theta)) + (pow(E,nu)*(-8*nu_der_1*Pi*gamma_0*SZ - 4*Pi*S_1_der + 12*Pi*gamma_0*S_1_der + gamma_0*SZ*beta_6 + gamma_0*S_Omega*beta_7 + gamma_0*S_1_der*beta_9 - 8*brel*nu_der_1*Pi*gamma_0*SZ*theta - 8*brel*Pi*gamma_0*S_1_der*theta + brel*gamma_0*SZ*beta_6*theta + brel*gamma_0*S_Omega*beta_7*theta + brel*gamma_0*S_1_der*beta_9*theta + gamma_0*S_0*beta_4*(1 + brel*theta) + gamma_0*S_1*beta_5*(1 + brel*theta)))/((1 + n)*gamma_0*pow(Omega,2)*(1 + brel*theta)) + (pow(E,-lambda + nu)*Pi*pow(theta,-1 - n)*(pow(E,lambda)*(-2 + l + pow(l,2))*SZ*(-1 + pow(E,lambda) + brel*(-5 + pow(E,lambda) + 2*l)*gamma_0*theta) - 2*(-(brel*(-3 + 3*pow(E,lambda) + 2*l)*gamma_0*S_0*theta) + pow(E,lambda)*S_Omega*(-1 + pow(E,lambda) + brel*(-1 + pow(E,lambda) + 2*l)*gamma_0*theta) + S_1*((-1 + pow(E,lambda))*(pow(E,lambda) + l) + brel*(pow(E,2*lambda) + l*(-7 + 2*l) + pow(E,lambda)*(-5 + 7*l + 2*pow(l,2)))*gamma_0*theta))))/(pow(brel,2)*pow(1 + n,2)*pow(xi,3)*pow(Omega,2)*(gamma_0 + brel*gamma_0*theta)) + (pow(E,-lambda + nu)*pow(theta,-1 - n)*(pow(E,lambda)*S_1*pow(theta,n)*(-2*(-1 + pow(E,lambda))*Pi*(-1 + n*(-1 + gamma_0)) + brel*(2*Pi*(1 + n - 10*gamma_0 - 9*n*gamma_0 + pow(E,lambda)*(-3 + n*(-3 + gamma_0) + 2*gamma_0) + 2*l*(1 + n)*(-1 + 3*gamma_0)) + l*(1 + n)*gamma_0*alpha_5)*theta - pow(brel,2)*(1 + n)*gamma_0*(4*(4 + pow(E,lambda) + 2*l)*Pi - l*alpha_5)*pow(theta,2)) + theta*(-(brel*pow(E,lambda)*(1 + n)*S_Omega*pow(theta,n)*(-(l*gamma_0*alpha_7*(1 + brel*theta)) + 4*pow(E,lambda)*Pi*(1 + brel*gamma_0*theta))) + brel*pow(E,lambda)*(1 + n)*SZ*pow(theta,n)*(l*gamma_0*alpha_6*(1 + brel*theta) + 2*Pi*(pow(E,lambda)*(-2 + l + pow(l,2)) - 8*gamma_0 + brel*(-8 + pow(E,lambda)*(-2 + l + pow(l,2)))*gamma_0*theta)) + gamma_0*(-4*Pi*S_1_der2 + brel*pow(E,lambda)*l*(1 + n)*S_1_der*alpha_9*pow(theta,n)*(1 + brel*theta) + brel*pow(E,lambda)*(1 + n)*S_0*pow(theta,n)*(4*Pi*(-2 + brel*theta) + alpha_4*(l + brel*l*theta))))))/(brel*pow(1 + n,2)*gamma_0*xi*pow(Omega,2)*(1 + brel*theta))
+;
+
+dydx[3] = H0*alphaH_0 + W*alphaH_1 + V*alphaH_2 + H1*alphaH_3 ;
+dydx[3] += (-16*Pi*S_1_der - 32*brel*lambda_der_1*Pi*gamma_0*SZ*theta + 32*brel*Pi*gamma_0*SZ_der*theta + brel*l*lambda_der_1*gamma_0*SZ*alpha_6*theta + brel*l*lambda_der_1*gamma_0*S_Omega*alpha_7*theta + brel*l*lambda_der_1*gamma_0*S_1_der*alpha_9*theta + brel*gamma_0*S_0*(l*lambda_der_1*alpha_4 - 2*(3 + 2*l)*beta_4)*theta + brel*gamma_0*S_1*(l*lambda_der_1*alpha_5 - 2*(3 + 2*l)*beta_5)*theta - 6*brel*gamma_0*SZ*beta_6*theta - 4*brel*l*gamma_0*SZ*beta_6*theta - 6*brel*gamma_0*S_Omega*beta_7*theta - 4*brel*l*gamma_0*S_Omega*beta_7*theta - 6*brel*gamma_0*S_1_der*beta_9*theta - 4*brel*l*gamma_0*S_1_der*beta_9*theta)/(2.*brel*gamma_0*xi*beta_3*theta) + (-16*pow(E,lambda)*Pi*S_1 - 16*l*Pi*S_1 - 2*brel*pow(E,lambda)*gamma_0*S_0*alpha_4*theta - 4*brel*l*gamma_0*S_0*alpha_4*theta + brel*pow(E,lambda)*l*gamma_0*S_0*alpha_4*theta - 2*brel*pow(l,2)*gamma_0*S_0*alpha_4*theta + brel*pow(E,lambda)*pow(l,2)*gamma_0*S_0*alpha_4*theta - 2*brel*pow(E,lambda)*gamma_0*S_1*alpha_5*theta - 4*brel*l*gamma_0*S_1*alpha_5*theta + brel*pow(E,lambda)*l*gamma_0*S_1*alpha_5*theta - 2*brel*pow(l,2)*gamma_0*S_1*alpha_5*theta + brel*pow(E,lambda)*pow(l,2)*gamma_0*S_1*alpha_5*theta - 2*brel*pow(E,lambda)*gamma_0*S_1_der*alpha_9*theta - 4*brel*l*gamma_0*S_1_der*alpha_9*theta + brel*pow(E,lambda)*l*gamma_0*S_1_der*alpha_9*theta - 2*brel*pow(l,2)*gamma_0*S_1_der*alpha_9*theta + brel*pow(E,lambda)*pow(l,2)*gamma_0*S_1_der*alpha_9*theta + SZ*(8*pow(E,lambda)*(-2 + l + pow(l,2))*Pi + brel*gamma_0*(16*(1 + l)*(2 + pow(E,lambda)*l)*Pi + (pow(E,lambda)*(-1 + l) - 2*l)*(2 + l)*alpha_6)*theta) + S_Omega*(-16*pow(E,lambda)*Pi + brel*(pow(E,lambda)*(-1 + l) - 2*l)*(2 + l)*gamma_0*alpha_7*theta))/(2.*brel*gamma_0*pow(xi,2)*beta_3*theta) + (gamma_0*S_0*(-2*alphaW_4*beta_1 - 2*alphaV_4*beta_2 + lambda_der_1*beta_4 - 2*beta_der_4)*theta - gamma_0*(2*S_1_der*alphaW_9*beta_1 + 2*SZ_der*alphaV_10*beta_2 + 2*S_Omega_der*alphaV_11*beta_2 + 2*S_1_der2*alphaV_12*beta_2 + 2*S_0_der*alphaV_8*beta_2 + 2*S_1_der*alphaV_9*beta_2 + 2*S_0_der*beta_4 + 2*S_1_der*beta_5 + 2*SZ_der*beta_6 + 2*S_Omega_der*beta_7 - lambda_der_1*S_1_der*beta_9 + 2*S_1_der2*beta_9 + SZ*(2*alphaW_6*beta_1 + 2*alphaV_6*beta_2 - lambda_der_1*beta_6 + 2*beta_der_6) + S_Omega*(2*alphaW_7*beta_1 + 2*alphaV_7*beta_2 - lambda_der_1*beta_7 + 2*beta_der_7) + 2*S_1_der*beta_der_9)*theta + S_1*(-2*gamma_0*alphaW_5*beta_1*theta - 2*gamma_0*alphaV_5*beta_2*theta + lambda_der_1*gamma_0*beta_5*theta - 2*gamma_0*beta_der_5*theta + 16*pow(E,lambda)*Pi*pow(theta,n) + 16*pow(E,lambda)*n*Pi*pow(theta,n) - 16*brel*pow(E,lambda)*Pi*pow(theta,1 + n) - 16*brel*pow(E,lambda)*n*Pi*pow(theta,1 + n)))/(2.*gamma_0*beta_3*theta)
+;
+
+//------------------------------------
+
+cout<<"dydx regularized "<<endl;
+out_put_vec(dydx);
+
+std::exit(0);
 }
 
 //===============================================================================================================================================
@@ -451,10 +385,6 @@ void RHS_PF_SHEAR::get_dydx(double xi, const std::vector<double> &y, std::vector
     double lambda = lambdafunc(xi);
     double nu = nufunc(xi);
     
-    Eigen::MatrixXd A(6,6);
-
-    Eigen::VectorXd Svec(4);
-
 //------------------------------------------------------------------
     double H00 = H00func(xi);
     double V0 = V0func(xi);
@@ -465,11 +395,13 @@ void RHS_PF_SHEAR::get_dydx(double xi, const std::vector<double> &y, std::vector
     double feta_der = fetaderfunc(theta,n);
     double feta_der_2 = fetader2func(theta,n);
 
-    Eigen::VectorXd Yvec0(4);
-    Yvec0 << H00, V0, W0, H00der;
-
+    // cout<<"before"<<endl;
+    // cout<<"xi = "<<xi<<endl;
+    // out_put_vec(dydx);
     get_alpha_beta_funcs_ders_and_shear_source(l, Omega, xi, theta, n, brel, gamma_0, lambda, nu, feta, feta_der, feta_der_2,
-    H00, V0, W0, H00der, y , dydx);
+    H00, W0, V0, H00der, y , dydx);
+    // cout<<"after"<<endl;
+    // out_put_vec(dydx);
 
 
 }
@@ -479,3 +411,279 @@ void RHS_PF_SHEAR::operator()(const std::vector<double> &y , std::vector<double>
     get_dydx(r, y, dydt);
 }
 //---------------------------------------------------
+//==========================================================
+SERIES_ORIGIN_SHEAR::SERIES_ORIGIN_SHEAR(double l, double Omega, double nu0, double n, double brel, double gamma_0, 
+    double feta_c, double feta_der_c, double feta_der2_c, double H0_0, double W0_0):
+l{l},
+Omega{Omega},
+nu0{nu0},
+n{n},
+brel{brel},
+gamma_0{gamma_0},
+feta_c{feta_c},
+feta_der_c{feta_der_c},
+feta_der2_c{feta_der2_c},
+H0_0{H0_0},
+W0_0{W0_0}
+{
+
+}
+
+//-------------------------------------------------
+SERIES_ORIGIN_SHEAR::~SERIES_ORIGIN_SHEAR(void)
+{
+}
+//-------------------------------------------------
+void SERIES_ORIGIN_SHEAR::operator()( double xi, const std::vector<double> yin, std::vector<double> &y )
+{ 
+double H_0= yin[0];
+double W_0= yin[1];
+//-----------------------------
+y[0] = H_0 - (pow(xi,2)*(-3*pow(E,nu0)*feta_c*H0_0*l*(1 + l)*(6 + 4*l)*(1 + 3*brel*gamma_0)*((1 + 3*brel)*pow(E,nu0)*(1 + l)*(-1 + n*(-1 + gamma_0)) - 4*(1 + n)*pow(Omega,2)) + 6*pow(E,nu0/2.)*H_0*l*(3 + 2*l)*(1 + n)*gamma_0*Omega*(pow(E,nu0)*(1 + l)*(3 + 3*pow(brel,2)*(9 + l)*gamma_0 + brel*(3 + (15 - 3*l - 2*pow(l,2))*gamma_0)) + 3*brel*(9 + l)*gamma_0*pow(Omega,2)) + 3*(1 + brel)*pow(E,nu0/2.)*(6 + 4*l)*(1 + n)*W_0*gamma_0*Omega*((1 + 3*brel)*pow(E,nu0)*l*(1 + l)*(-1 + n*(-1 + gamma_0)) - 3*(1 + n)*(-1 + 9*brel*gamma_0 + l*(-1 + brel*gamma_0))*pow(Omega,2)) + (6 + 4*l)*(1 + n)*W0_0*(pow(1 + 3*brel,2)*pow(E,2*nu0)*feta_c*l*pow(1 + l,2)*(-1 + n*(-1 + gamma_0))*(1 + 3*brel*gamma_0) - (1 + 3*brel)*pow(E,nu0)*(1 + l)*(-6*(1 + brel)*feta_der_c*(-1 + l)*gamma_0*(1 + 3*brel*gamma_0) + feta_c*(l*(1 + n + 9*brel*gamma_0 + (3 + 9*brel)*n*gamma_0 + 6*pow(brel,2)*pow(gamma_0,2) + 3*brel*(3 + 2*brel)*n*pow(gamma_0,2)) + 3*(-1 - 5*brel*gamma_0 + 18*pow(brel,2)*pow(gamma_0,2) + n*(-1 + gamma_0 - 5*brel*gamma_0 + 3*brel*(1 + 6*brel)*pow(gamma_0,2)))))*pow(Omega,2) - 12*feta_c*(1 + n)*(-1 - 3*brel*gamma_0 + 27*pow(brel,2)*pow(gamma_0,2) + l*(-1 - 3*brel*gamma_0 + 3*pow(brel,2)*pow(gamma_0,2)))*pow(Omega,4))))/(36.*pow(E,(3*nu0)/2.)*l*(1 + l)*pow(3 + 2*l,2)*pow(gamma_0,2)*Omega);
+//----------------------
+y[1] = W_0 + (pow(xi,2)*(135*(1 + brel)*H_0*l*(1 + n)*gamma_0*pow(Omega,3)*((1 + 3*brel)*pow(E,nu0)*l*(1 + l)*(-1 + n*(-1 + gamma_0)) + 3*(1 + n)*(-2 - 6*brel*gamma_0 + l*(-1 + brel*gamma_0))*pow(Omega,2)) - (45*(1 + brel)*pow(1 + n,2)*W_0*gamma_0*pow(Omega,3)*(pow(E,2*nu0)*(1 + l)*pow(l + 3*brel*l,2)*(-1 + n*(-1 + gamma_0)) - 3*pow(E,nu0)*l*(1 + n + n*gamma_0 + l*n*gamma_0 + 6*pow(brel,2)*(-1 + l)*(1 + n)*gamma_0 + brel*(3 + 2*(-4 + 3*l + pow(l,2))*gamma_0 + n*(3 + (-5 + 9*l + 2*pow(l,2))*gamma_0)))*pow(Omega,2) + 9*(2 + l)*(1 + n)*pow(Omega,4)))/pow(E,nu0) - (3*H0_0*l*(5*pow(1 + 3*brel,3)*pow(E,3*nu0)*feta_c*pow(l,2)*pow(1 + l,2)*pow(-1 + n*(-1 + gamma_0),2) - 3*(1 + 3*brel)*pow(E,2*nu0)*l*(1 + l)*(-1 + n*(-1 + gamma_0))*(-5*(1 + 4*brel + 3*pow(brel,2))*feta_der_c*(1 + 2*l)*gamma_0 + feta_c*(15*pow(brel,2)*(5 + 2*n + 2*l*(2 + n))*gamma_0 + l*(5 + 5*n + 10*gamma_0 - n*gamma_0) + 3*(-5 - 5*n + 5*gamma_0 + 2*n*gamma_0) + brel*(3*(-5 - 5*n + 10*gamma_0 + 2*n*gamma_0) + l*(15 + 15*n + 50*gamma_0 + 19*n*gamma_0))))*pow(Omega,2) - 30*(1 + 3*brel)*pow(E,nu0)*(1 + n)*(-3*(1 + brel)*feta_der_c*l*gamma_0*(-1 - brel*gamma_0 + l*(-1 + brel*gamma_0)) + feta_c*(-3 + 3*n*(-1 + gamma_0) + pow(l,2)*(1 + n)*(-2 - 3*brel*gamma_0 + 3*pow(brel,2)*pow(gamma_0,2)) - l*(5 + 3*brel*gamma_0 + 3*pow(brel,2)*pow(gamma_0,2) + n*(5 + 3*(-1 + brel)*gamma_0 + 3*pow(brel,2)*pow(gamma_0,2)))))*pow(Omega,4) + 180*feta_c*(2 + l)*pow(1 + n,2)*pow(Omega,6)))/pow(E,nu0/2.) + ((1 + n)*W0_0*(5*pow(1 + 3*brel,4)*pow(E,4*nu0)*feta_c*pow(l,3)*pow(1 + l,2)*pow(-1 + n*(-1 + gamma_0),2) - 3*pow(1 + 3*brel,2)*pow(E,3*nu0)*pow(l,2)*(1 + l)*(-1 + n*(-1 + gamma_0))*(-5*(1 + 4*brel + 3*pow(brel,2))*feta_der_c*(1 + 2*l)*gamma_0 + feta_c*(15*pow(brel,2)*(3 + l*(6 + 4*n))*gamma_0 + n*(-20 + (17 - 2*l)*gamma_0) + 5*(-4 + (3 + 2*l)*gamma_0) + brel*(-30 - 30*n + 20*(1 + 3*l)*gamma_0 + (17 + 38*l)*n*gamma_0)))*pow(Omega,2) - 3*(1 + 3*brel)*pow(E,2*nu0)*l*(feta_c*(90*pow(brel,3)*(-1 + l)*pow(1 + n,2)*pow(gamma_0,2) - 9*pow(brel,2)*gamma_0*(5*(-7 + 2*gamma_0) + pow(n,2)*(-20 + 22*gamma_0) + n*(-55 + 47*gamma_0) + 2*pow(l,2)*n*(5 + 9*gamma_0 + n*(5 + 4*gamma_0)) + 5*l*(-7 + 2*pow(n,2)*(-1 + gamma_0) - 2*gamma_0 + n*(-9 + 5*gamma_0))) + (1 + l)*(-3*(25 - 15*gamma_0 + pow(n,2)*(25 - 31*gamma_0 + 6*pow(gamma_0,2)) + n*(50 - 46*gamma_0 + 15*pow(gamma_0,2))) + l*(-5 + 30*gamma_0 + pow(n,2)*(-5 - 18*gamma_0 + 3*pow(gamma_0,2)) - 2*n*(5 - 6*gamma_0 + 15*pow(gamma_0,2)))) - 3*brel*(1 + l)*(45 - 40*gamma_0 + pow(n,2)*(45 - 61*gamma_0 + 12*pow(gamma_0,2)) + n*(90 - 101*gamma_0 + 36*pow(gamma_0,2)) + l*(5 - 30*gamma_0 + pow(n,2)*(5 + 16*gamma_0 + 13*pow(gamma_0,2)) + 2*n*(5 - 7*gamma_0 + 22*pow(gamma_0,2))))) + 3*(1 + brel)*gamma_0*(-10*(1 + 4*brel + 3*pow(brel,2))*feta_der2_c*(-1 + pow(l,2))*gamma_0 + feta_der_c*(30*pow(brel,2)*(-1 + l)*(-1 + l*n)*gamma_0 + (1 + l)*(-15 - 15*n + 11*n*gamma_0 + 2*l*(5 + 5*n + 2*n*gamma_0)) + brel*(-45 - 45*n + 15*l*(-1 + n*(-1 + gamma_0) - 2*gamma_0) + 30*gamma_0 + 41*n*gamma_0 + pow(l,2)*(30 + n*(30 + 34*gamma_0))))))*pow(Omega,4) - 90*pow(E,nu0)*(1 + n)*(-6*(1 + 4*brel + 3*pow(brel,2))*feta_der_c*gamma_0 + feta_c*(3 + 3*n - 3*n*gamma_0 + 18*pow(brel,3)*(-6 + l)*(1 + n)*pow(gamma_0,2) + 18*pow(brel,2)*(1 + n)*gamma_0*(1 + (-6 + l)*gamma_0) + l*(1 + n - 3*n*gamma_0) + brel*(9 + 9*n + 6*gamma_0 - 3*n*gamma_0 + 3*l*(1 + n - 3*n*gamma_0))))*pow(Omega,6) - 540*feta_c*(2 + l)*pow(1 + n,2)*pow(Omega,8)))/pow(E,(3*nu0)/2.)))/(810.*(1 + brel)*l*(3 + 2*l)*pow(1 + n,2)*pow(gamma_0,2)*pow(Omega,5));
+//----------------------
+y[2] = -(W_0/l) + (pow(xi,2)*((-135*H_0*gamma_0*pow(Omega,3)*((1 + 3*brel)*pow(E,nu0)*(3 + 4*l + pow(l,2))*(-1 + n*(-1 + gamma_0)) + 3*(1 + n)*(-1 + 9*brel*gamma_0 + l*(-1 + brel*gamma_0))*pow(Omega,2)))/(1 + n) + (45*W_0*gamma_0*pow(Omega,3)*(pow(1 + 3*brel,2)*pow(E,2*nu0)*l*(3 + 4*l + pow(l,2))*(-1 + n*(-1 + gamma_0)) - 3*pow(E,nu0)*(6*pow(brel,2)*(-3 + 2*l + pow(l,2))*(1 + n)*gamma_0 + (1 + l)*(-3 + n*(-3 + (3 + l)*gamma_0)) + brel*(2*pow(l,3)*(1 + n)*gamma_0 + pow(l,2)*(8 + 11*n)*gamma_0 + 3*l*(-3 - 3*n + 4*n*gamma_0) - 3*(3 + 3*n + 10*gamma_0 + 7*n*gamma_0)))*pow(Omega,2) + 9*(1 + l)*(1 + n)*pow(Omega,4)))/(pow(E,nu0)*l) + (3*H0_0*(5*pow(1 + 3*brel,3)*pow(E,3*nu0)*feta_c*l*pow(1 + l,2)*(3 + l)*pow(-1 + n*(-1 + gamma_0),2) - 3*(1 + 3*brel)*pow(E,2*nu0)*(3 + 4*l + pow(l,2))*(-1 + n*(-1 + gamma_0))*(-5*(1 + 4*brel + 3*pow(brel,2))*feta_der_c*(1 + 2*l)*gamma_0 + feta_c*(15*pow(brel,2)*(5 + 2*n + 2*l*(2 + n))*gamma_0 + l*(5 + 5*n + 10*gamma_0 - n*gamma_0) + 3*(-5 - 5*n + 5*gamma_0 + 2*n*gamma_0) + brel*(3*(-5 - 5*n + 10*gamma_0 + 2*n*gamma_0) + l*(15 + 15*n + 50*gamma_0 + 19*n*gamma_0))))*pow(Omega,2) - 30*(1 + 3*brel)*pow(E,nu0)*(1 + n)*(-3*(1 + brel)*feta_der_c*(3 + l)*gamma_0*(-1 - brel*gamma_0 + l*(-1 + brel*gamma_0)) + feta_c*(pow(l,2)*(1 + n)*(-2 - 3*brel*gamma_0 + 3*pow(brel,2)*pow(gamma_0,2)) - 3*(1 + 3*brel*gamma_0 + 3*pow(brel,2)*pow(gamma_0,2) + n*(1 + gamma_0 + 3*brel*gamma_0 + 3*pow(brel,2)*pow(gamma_0,2))) + l*(-5 - 12*brel*gamma_0 + 6*pow(brel,2)*pow(gamma_0,2) + n*(-5 - 3*(1 + 4*brel)*gamma_0 + 6*pow(brel,2)*pow(gamma_0,2)))))*pow(Omega,4) + 180*feta_c*(1 + l)*pow(1 + n,2)*pow(Omega,6)))/((1 + brel)*pow(E,nu0/2.)*pow(1 + n,2)) + (W0_0*(-5*pow(1 + 3*brel,4)*pow(E,4*nu0)*feta_c*pow(l,2)*pow(1 + l,2)*(3 + l)*pow(-1 + n*(-1 + gamma_0),2) + 3*(1 + 3*brel)*pow(E,2*nu0)*(feta_c*(90*pow(brel,3)*(-3 + 2*l + pow(l,2))*pow(1 + n,2)*pow(gamma_0,2) - 9*pow(brel,2)*(3 + l)*gamma_0*(5*(-7 + 2*gamma_0) + pow(n,2)*(-20 + 22*gamma_0) + n*(-55 + 47*gamma_0) + 2*pow(l,2)*n*(5 + 9*gamma_0 + n*(5 + 4*gamma_0)) + 5*l*(-7 + 2*pow(n,2)*(-1 + gamma_0) - 2*gamma_0 + n*(-9 + 5*gamma_0))) - 3*brel*(1 + l)*(l*gamma_0*(-130 + pow(n,2)*(47 + 51*gamma_0) + n*(-83 + 168*gamma_0)) + pow(l,2)*(5 - 30*gamma_0 + pow(n,2)*(5 + 16*gamma_0 + 13*pow(gamma_0,2)) + 2*n*(5 - 7*gamma_0 + 22*pow(gamma_0,2))) + 3*(15 - 40*gamma_0 + pow(n,2)*(15 - 31*gamma_0 + 12*pow(gamma_0,2)) + n*(30 - 71*gamma_0 + 36*pow(gamma_0,2)))) + (1 + l)*(-27*(5 - 5*gamma_0 + pow(n,2)*(5 - 7*gamma_0 + 2*pow(gamma_0,2)) + n*(10 - 12*gamma_0 + 5*pow(gamma_0,2))) + pow(l,2)*(-5 + 30*gamma_0 + pow(n,2)*(-5 - 18*gamma_0 + 3*pow(gamma_0,2)) - 2*n*(5 - 6*gamma_0 + 15*pow(gamma_0,2))) - 3*l*(10 - 45*gamma_0 + pow(n,2)*(10 + 7*gamma_0 + 3*pow(gamma_0,2)) + n*(20 - 38*gamma_0 + 45*pow(gamma_0,2))))) + 3*(1 + brel)*(3 + l)*gamma_0*(-10*(1 + 4*brel + 3*pow(brel,2))*feta_der2_c*(-1 + pow(l,2))*gamma_0 + feta_der_c*(30*pow(brel,2)*(-1 + l)*(-1 + l*n)*gamma_0 + (1 + l)*(-15 - 15*n + 11*n*gamma_0 + 2*l*(5 + 5*n + 2*n*gamma_0)) + brel*(-45 - 45*n + 15*l*(-1 + n*(-1 + gamma_0) - 2*gamma_0) + 30*gamma_0 + 41*n*gamma_0 + pow(l,2)*(30 + n*(30 + 34*gamma_0))))))*pow(Omega,4) + 270*pow(E,nu0)*(1 + n)*(-4*(1 + 4*brel + 3*pow(brel,2))*feta_der_c*(1 + l)*gamma_0 + feta_c*(6*pow(brel,3)*(9 + l)*(1 + n)*pow(gamma_0,2) + (1 + l)*(1 + n + n*gamma_0) + 6*pow(brel,2)*(1 + n)*gamma_0*(2 + 9*gamma_0 + l*(2 + gamma_0)) + brel*(1 + l)*(3 + 4*gamma_0 + n*(3 + 7*gamma_0))))*pow(Omega,6) + 540*feta_c*(1 + l)*pow(1 + n,2)*pow(Omega,8) + 3*pow(E,3*nu0)*l*(3 + 4*l + pow(l,2))*(-1 + n*(-1 + gamma_0))*(-5*(1 + 4*brel + 3*pow(brel,2))*feta_der_c*(1 + 2*l)*gamma_0 + feta_c*(15*pow(brel,2)*(3 + l*(6 + 4*n))*gamma_0 + n*(-20 + (17 - 2*l)*gamma_0) + 5*(-4 + (3 + 2*l)*gamma_0) + brel*(-30 - 30*n + 20*(1 + 3*l)*gamma_0 + (17 + 38*l)*n*gamma_0)))*pow(Omega + 3*brel*Omega,2)))/((1 + brel)*pow(E,(3*nu0)/2.)*l*(1 + n))))/(810.*(1 + l)*(3 + 2*l)*pow(gamma_0,2)*pow(Omega,5));
+//----------------------
+y[3] = -0.05555555555555555*(xi*(-3*pow(E,nu0)*feta_c*H0_0*l*(1 + l)*(6 + 4*l)*(1 + 3*brel*gamma_0)*((1 + 3*brel)*pow(E,nu0)*(1 + l)*(-1 + n*(-1 + gamma_0)) - 4*(1 + n)*pow(Omega,2)) + 6*pow(E,nu0/2.)*H_0*l*(3 + 2*l)*(1 + n)*gamma_0*Omega*(pow(E,nu0)*(1 + l)*(3 + 3*pow(brel,2)*(9 + l)*gamma_0 + brel*(3 + (15 - 3*l - 2*pow(l,2))*gamma_0)) + 3*brel*(9 + l)*gamma_0*pow(Omega,2)) + 3*(1 + brel)*pow(E,nu0/2.)*(6 + 4*l)*(1 + n)*W_0*gamma_0*Omega*((1 + 3*brel)*pow(E,nu0)*l*(1 + l)*(-1 + n*(-1 + gamma_0)) - 3*(1 + n)*(-1 + 9*brel*gamma_0 + l*(-1 + brel*gamma_0))*pow(Omega,2)) + (6 + 4*l)*(1 + n)*W0_0*(pow(1 + 3*brel,2)*pow(E,2*nu0)*feta_c*l*pow(1 + l,2)*(-1 + n*(-1 + gamma_0))*(1 + 3*brel*gamma_0) - (1 + 3*brel)*pow(E,nu0)*(1 + l)*(-6*(1 + brel)*feta_der_c*(-1 + l)*gamma_0*(1 + 3*brel*gamma_0) + feta_c*(l*(1 + n + 9*brel*gamma_0 + (3 + 9*brel)*n*gamma_0 + 6*pow(brel,2)*pow(gamma_0,2) + 3*brel*(3 + 2*brel)*n*pow(gamma_0,2)) + 3*(-1 - 5*brel*gamma_0 + 18*pow(brel,2)*pow(gamma_0,2) + n*(-1 + gamma_0 - 5*brel*gamma_0 + 3*brel*(1 + 6*brel)*pow(gamma_0,2)))))*pow(Omega,2) - 12*feta_c*(1 + n)*(-1 - 3*brel*gamma_0 + 27*pow(brel,2)*pow(gamma_0,2) + l*(-1 - 3*brel*gamma_0 + 3*pow(brel,2)*pow(gamma_0,2)))*pow(Omega,4))))/(pow(E,(3*nu0)/2.)*l*(1 + l)*pow(3 + 2*l,2)*pow(gamma_0,2)*Omega);
+//----------------------
+}
+//-------------------------------------------------
+//=======================================================================================================
+DISS_SHEAR_TIDE::DISS_SHEAR_TIDE(double l, double Omega, 
+    double n, double brel,
+    double nu0,
+    double gamma_0,
+    double mu1,
+    double xi1,
+    std::function <double(double)> thetafunc, 
+    std::function <double(double)> lambdafunc, 
+    std::function <double(double)> nufunc,
+    std::function <double(double, double)> fetafunc,
+    std::function <double(double, double)> fetaderfunc,
+    std::function <double(double, double)> fetader2func,
+    std::function <double(double)> H00, 
+    std::function <double(double)> W0, 
+    std::function <double(double)> V0,
+    std::function <double(double)> H00der,
+    double H0_0, double W0_0):
+l{l},
+Omega{Omega},
+n{n},
+brel{brel},
+nu0{nu0},
+gamma_0{gamma_0},
+mu1{mu1},
+xi1{xi1},
+thetafunc{thetafunc},
+lambdafunc{lambdafunc},
+nufunc{nufunc},
+H0_ext(2),
+H1_ext(2),
+fetafunc{fetafunc},
+fetaderfunc{fetaderfunc},
+fetader2func{fetader2func},
+H00func{H00},
+W0func{W0},
+V0func{V0},
+H00derfunc{H00der},
+H0_0{H0_0},
+W0_0{W0_0},
+rhspart(l, Omega, n, brel, gamma_0, thetafunc, lambdafunc, nufunc, fetafunc,fetaderfunc,fetader2func, 
+H00, W0, V0, H00der),
+series_origin_part(l, Omega, nu0, n, brel, gamma_0, fetafunc(1.0,n),fetaderfunc(1.0,n),fetader2func(1.0,n), H0_0, W0_0),
+rhshom(l, Omega, n, brel,gamma_0, thetafunc, lambdafunc, nufunc),
+series_origin_hom(l, Omega, nu0, n, brel, gamma_0),
+series_surf(l, Omega, n, brel, gamma_0, mu1, xi1),
+get_H0_flag{0}
+{
+    
+}
+DISS_SHEAR_TIDE::~DISS_SHEAR_TIDE(void)
+{
+
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------
+void DISS_SHEAR_TIDE::get_H0_and_H1_ext( )
+{
+    if(get_H0_flag ==0)
+    {
+        obtain_H0_and_H1_ext(l, Omega, n, brel, mu1, xi1, H0_ext, H1_ext );
+        
+        H0_ext[0] = 0.;
+
+        H1_ext[0] = 0.;
+
+        get_H0_flag = 1;
+    }
+    else{
+
+    }
+    
+
+}
+//-------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------
+void DISS_SHEAR_TIDE::solve_and_match(int iterate, 
+double dr, double rl, double rmatch, double rr, 
+vector<double> &icsl_val, vector<double> &icsr_val,
+double &norm, double &k2 )
+{   
+    double omega = Omega;
+    double Rstar = xi1;
+    assert(rl>0);
+    assert(rr<Rstar);
+    assert(rl<rmatch);
+    assert(rr>rmatch);
+
+    // Left solutions
+    //-----------------------------------------
+    int len_var = 4;
+
+    vector<double> yl_part(len_var), yl_hom1(len_var), yl_hom2(len_var);
+    vector<double> ics1{1.,0.}, ics2{1.,1.} ;
+    vector<double> ssl_part(len_var), ssl_hom1(len_var), ssl_hom2(len_var);
+
+
+    if(iterate)
+    {
+        ssl_part = icsl_val;
+
+        solve_adaptive(rhspart, series_origin_part,  series_surf, "left", 0, rl, rmatch, Rstar, ics1, ssl_part, yl_part, dr);
+        
+    }
+    else{
+         solve_adaptive(rhspart, series_origin_part,  series_surf, "left", 1, rl, rmatch, Rstar, ics1, ssl_part, yl_part, dr);
+    }
+    
+    solve_adaptive(rhshom, series_origin_hom,  series_surf, "left", 1, rl, rmatch, Rstar, ics1, ssl_hom1, yl_hom1, dr);
+    solve_adaptive(rhshom, series_origin_hom,  series_surf, "left", 1, rl, rmatch, Rstar, ics2, ssl_hom2, yl_hom2, dr);
+  
+    //-----------------------------------------
+    // Right calculations
+
+    vector<double> yr_part(len_var), yr_hom1(len_var), yr_hom2(len_var), yr_hom3(len_var);
+    vector<double> icsr1{0.1,0.,0.}, icsr2{0.1,0.1,0.}, icsr3{0.1,0.1,0.1} ;
+    vector<double> ssr_part(len_var), ssr_hom1(len_var), ssr_hom2(len_var), ssr_hom3(len_var);
+    
+    if(iterate)
+    {
+        ssr_part = icsr_val;
+        solve_adaptive(rhspart, series_origin_part,  series_surf, "right", 0, rr, rmatch, Rstar, icsr1, ssr_part, yr_part, dr);
+    }
+    else{
+          solve_adaptive(rhspart, series_origin_part,  series_surf, "right", 1, rr, rmatch, Rstar, icsr1, ssr_hom1, yr_hom1, dr);
+    }
+    
+    solve_adaptive(rhshom, series_origin_hom,  series_surf, "right", 1, rr, rmatch, Rstar, icsr1, ssr_hom1, yr_hom1, dr);
+    solve_adaptive(rhshom, series_origin_hom,  series_surf, "right", 1, rr, rmatch, Rstar, icsr2, ssr_hom2, yr_hom2, dr);
+    solve_adaptive(rhshom, series_origin_hom,  series_surf, "right", 1, rr, rmatch, Rstar, icsr3, ssr_hom3, yr_hom3, dr);
+
+    // //========================================================
+    get_H0_and_H1_ext();
+
+    Eigen::VectorXd b(6);
+
+    for(int i=0; i<4; ++i)
+    {
+        b[i] = yr_part[i] - yl_part[i]; 
+    }
+    b[4] = H0_ext[0] - ssr_part[0]; 
+    b[5] = H1_ext[0] - ssr_part[3];
+
+    Eigen::MatrixXd A(6,6);
+
+    for(int i=0; i<len_var; ++i)
+    {
+        A(i,0) = yl_hom1[i]; 
+        A(i,1) = yl_hom2[i];
+
+        A(i,2) = -yr_hom1[i]; 
+        A(i,3) = -yr_hom2[i];
+        A(i,4) = -yr_hom3[i];
+
+    }
+    A(4,2) = ssr_hom1[0]; A(4,3) = ssr_hom2[0]; 
+    A(4,4) = ssr_hom3[0]; A(4,5) = -H0_ext[1];
+
+    A(5,2) = ssr_hom1[3]; 
+    A(5,3) = ssr_hom2[3];
+    A(5,4) = ssr_hom3[3];
+    A(5,5) = -H1_ext[1];
+
+    cout<<"A = "<<endl;
+
+    cout<<A<<endl;
+    
+
+
+    Eigen::VectorXd x(6);
+    x = A.fullPivLu().solve(b);
+    vector<double> Cs(x.data(), x.data() + x.rows() * x.cols());
+    check_field_isfinite(rmatch, Cs, "solution for matching coefficients in nan");
+    double relative_error = (A*x - b).norm() / b.norm(); // norm() is L2 norm
+    std::cout << "The relative error is:\n" << relative_error << std::endl;
+    std::cout << "The determinant of A is " << A.determinant() << std::endl;
+
+    cout<<"x = "<<endl;
+    cout<<x<<endl;
+
+    cout<<"b = "<<endl;
+    cout<<b<<endl;
+
+    
+    for(int i =0; i<len_var; ++i)
+    {   
+        icsl_val[i] = ssl_part[i] + x[0]*ssl_hom1[i] + x[1]*ssl_hom2[i] ;
+        
+        icsr_val[i] = ssr_part[i] + x[2]*ssr_hom1[i] + x[3]*ssr_hom2[i] + x[4]*ssr_hom3[i] ;
+
+    }
+   
+
+    k2 = x[5]/omega;
+
+    cout<<"k2_tau = "<<k2<<endl;
+
+    solve_adaptive(rhspart, series_origin_part,  series_surf, "left", 0, rl, rmatch, Rstar, ics1, icsl_val, yl_part, dr);
+    solve_adaptive(rhspart, series_origin_part,  series_surf, "right", 0, rr, rmatch, Rstar, ics1, icsr_val, yr_part, dr);
+
+    norm = 0;
+    for(int i = 0; i<len_var; ++i)
+    {   
+        norm += pow((yl_part[i] - yr_part[i]),2.);
+    }
+    norm = pow(norm,0.5);
+    cout<<"norm = "<<norm<<endl;
+    cout<<"--------------------------"<<endl;
+
+}
+
+
+//-------------------------------------------------
+
+void DISS_SHEAR_TIDE::solve_and_iterate(int steps, double dr, double rl, double rmatch, double rr, double &k2, double &norm)
+{
+    int len_var = 4;
+    vector<double> ssl(len_var);
+    vector<double> ssr(len_var);
+    norm = 0.;
+    ssl[0] = 1;
+    ssr[0] = 1;
+    solve_and_match(0, dr, rl, rmatch, rr, ssl, ssr, norm, k2);
+    cout<<"norm = "<<norm<<endl;
+    
+    int counter = 1;
+    while(counter<steps && norm > 1e-10)
+    {   
+        
+        cout<<"===================================================="<<endl;
+        cout<<"counter = "<<counter<<endl;
+        cout<<"norm = "<<norm<<endl;
+        solve_and_match(1, dr, rl, rmatch, rr, ssl, ssr, norm, k2);
+
+        counter +=1;
+    }
+}
+//-------------------------------------------------
