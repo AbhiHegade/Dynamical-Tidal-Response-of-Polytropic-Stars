@@ -102,7 +102,7 @@ double fzeta_func(double theta, double n)
 
 double feta_func(double theta, double n)
 {
- double i = 4;
+ double i = 3;
   return pow(theta,n+i);
   // return 0.;
 
@@ -111,14 +111,14 @@ double feta_func(double theta, double n)
 double feta_der_func(double theta, double n)
 {
 
-double i = 4;
+double i = 3;
 return (n+i)*pow(theta,n+i-1);
   // return 0.;
 }
 
 double feta_der_2_func(double theta, double n)
 {
-double i = 4;
+double i = 3;
 return (n+i)*(n+i-1)*pow(theta,n+i-2);
 // return 0.;
 }
