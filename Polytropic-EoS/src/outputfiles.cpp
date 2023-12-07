@@ -94,7 +94,7 @@ void combine_vec(const std::vector<double> vecl, const std::vector<double> vecr,
 
 double fzeta_func(double theta, double n)
 {
-  return pow(theta,n+2);
+  return pow(theta,n+3);
 }
 
 
