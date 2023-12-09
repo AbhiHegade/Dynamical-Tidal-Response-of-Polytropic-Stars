@@ -19,6 +19,7 @@ public:
   int div_Omega;
   double factor_match;
   int solve_visc;
+  int write_vec;
   // std::string visc_type;
   //-----------
 //------------------------------------------------------------------------------

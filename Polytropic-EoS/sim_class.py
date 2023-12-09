@@ -14,8 +14,8 @@ class Sim:
         # + "_"+str(current_time.minute)+"_"+str(current_time.second) \
         # + "_n_" + str(self.n) + "_b_" + str(self.b)
 
-        timestr = "n_" + str(self.n) + "_b_" + str(self.b) \
-        + "_" \
+        timestr = "n_" + str(self.n) + "_N_" + str(self.N1) \
+        + "_" + "_b_" + str(self.b) \
         + current_time.strftime("%a")+"_"+current_time.strftime("%b")+"_"  \
         + str(current_time.day) +"_"+ str(current_time.hour) \
         + "_"+str(current_time.minute)+"_"+str(current_time.second) 

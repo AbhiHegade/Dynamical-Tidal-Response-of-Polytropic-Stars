@@ -45,6 +45,7 @@ Sim_params::Sim_params(const string output_dir)
    factor_match = stod(read_sim_params(output_dir,"factor_match"));
 
    solve_visc = stoi(read_sim_params(output_dir,"solve_visc"));
+   write_vec = stoi(read_sim_params(output_dir,"write_vec"));
    // visc_type = read_sim_params(output_dir,"visc_type");
 
 }

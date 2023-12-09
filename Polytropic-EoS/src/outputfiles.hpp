@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
- void write_vec(std::string path, const std::vector<double> vecl, const std::vector<double> vecr, const std::string name_v);
+ void write_vec(std::string path, const std::vector<double> vecl, const std::string name_v);
  void write_double(std::string path, double omega, const std::string name_v);
  void check_field_isfinite(
     const double xi,

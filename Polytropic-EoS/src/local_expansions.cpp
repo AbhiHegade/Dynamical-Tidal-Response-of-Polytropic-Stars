@@ -154,6 +154,7 @@ void obtain_H0_and_H1_ext(double l, double Omega, double n, double brel, double 
     double z = 1 - (2*brel*mu1*(1 + n))/xi1;
     double dzdxi = (2*brel*mu1*(1 + n))/pow(xi1,2);
     double epsilon = mu1*Omega*pow(brel*(1+n),3./2.);
+    // double epsilon = 0.0;
  
     double C1 = brel*(n+1)*mu1/xi1;
 

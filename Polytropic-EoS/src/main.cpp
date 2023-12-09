@@ -116,8 +116,6 @@ for(int i=0; i<divisions; ++i)
 
   int N_write = sp.N_write;
 
-  vector<double> icsl(4), icsr(4);
-
   vector<double> H0_v(N_write);
   vector<double> W0_v(N_write);
   vector<double> V_v(N_write);
@@ -127,10 +125,37 @@ for(int i=0; i<divisions; ++i)
   vector<double> vals_origin(2);
 
   double normk2 =0.; 
+
+  if(sp.solve_visc || sp.write_vec)
+  {
     
-  pf.solve_and_iterate_and_write(N_write, sp.steps_num, dr_internal, 
-    sp.xil, sp.factor_match*(sp.xil + xi1_true), xi1guess, 
-    k2, H0_v, W0_v, V_v, H1_v, xi_v, vals_origin, normk2);
+
+    
+    pf.solve_and_iterate_and_write(N_write, sp.steps_num, dr_internal, 
+      sp.xil, sp.factor_match*(sp.xil + xi1_true), xi1guess, 
+      k2, H0_v, W0_v, V_v, H1_v, xi_v, vals_origin, normk2);
+    if(sp.write_vec)
+    {
+      write_vec(path + "/", H0_v, "H0" );
+      write_vec(path + "/", W0_v, "W0");
+      write_vec(path + "/", V_v, "V");
+      write_vec(path + "/", H1_v, "H1");
+      if(i==0)
+      {
+        write_vec(path + "/", xi_v,"xi");
+      }
+
+    }
+  }
+  else{
+    vector<double> icsl(4), icsr(4);
+    pf.solve_and_iterate(sp.steps_num, dr_internal, 
+      sp.xil, sp.factor_match*(sp.xil + xi1_true), xi1guess, 
+      k2, normk2, icsl, icsr);
+  }
+  
+
+  
   if(sp.solve_visc)
   {
     cardinal_cubic_b_spline<double> H0_func(H0_v.begin(), H0_v.end(), sp.xil, xi_v[1]-xi_v[0]);

@@ -35,6 +35,23 @@ void write_vec(std::string path, const std::vector<double> vecl, const std::vect
   write_output.close();
 
 }
+void write_vec(std::string path, const std::vector<double> vecl, const string name_v){
+  string name = path + name_v + ".dat";
+  std::ofstream write_output(name , std::ios::app);
+  assert(write_output.is_open());
+  write_output.precision(16);
+
+  int nx = vecl.size();
+  for(int i = 0; i<nx-1; ++i ){
+    write_output<<vecl[i]<<",";
+  }
+  write_output<<vecl[nx-1]<<endl;
+  // write_output<<"\n"<<endl;
+
+  write_output.flush();
+  write_output.close();
+
+}
 void write_double(std::string path,double omega, const string name_v){
   string name = path + name_v + ".dat";
   std::ofstream write_output(name , std::ios::app);
