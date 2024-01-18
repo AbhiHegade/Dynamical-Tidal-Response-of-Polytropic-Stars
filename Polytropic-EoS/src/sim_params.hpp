@@ -13,6 +13,7 @@ public:
   int N_interp_LE;
   int steps_num;
   int N_write;
+  int solve_tides;
   //-----------
   double Omegalow;
   double Omegahigh;

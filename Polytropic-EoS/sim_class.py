@@ -72,6 +72,7 @@ class Sim:
         self.write_sim_params()
         self.output_b_vals()
 
+        subprocess.call('cp {} {}/'.format(self.setup_script,self.out_dir), shell=True)
         subprocess.call('\n./bin/default.run {} > {}/output.out'.format(self.output_dir,self.output_dir), shell=True)
    
 #===============================================================================

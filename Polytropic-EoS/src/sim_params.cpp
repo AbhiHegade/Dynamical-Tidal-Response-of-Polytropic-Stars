@@ -37,6 +37,7 @@ Sim_params::Sim_params(const string output_dir)
    N_interp_LE= stoi(read_sim_params(output_dir,"N_interp_LE"));
    steps_num = stoi(read_sim_params(output_dir,"steps_num"));
    N_write = stoi(read_sim_params(output_dir,"N_write"));
+   solve_tides = stoi(read_sim_params(output_dir,"solve_tides"));
 //----------------------------------------------------------------------
    Omegalow = stod(read_sim_params(output_dir,"Omegalow"));
    Omegahigh = stod(read_sim_params(output_dir,"Omegahigh"));

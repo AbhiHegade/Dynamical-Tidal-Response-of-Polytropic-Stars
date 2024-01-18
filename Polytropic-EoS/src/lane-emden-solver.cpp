@@ -69,7 +69,7 @@ void LE_SOLVER::step(state_type &y, double &xi, double &dxi)
 {   
     // cout<<"xi = "<<xi<<endl;
     // cout<<"y[0] = "<<y[0]<<"; y[1] = "<<y[1]<<endl;
-    double tol = 1e-7;
+    double tol = 1e-10;
     state_type yin = y;
     double xiin = xi;
     bs.try_step([this] (const state_type &y , state_type &dydt , double xi ) 
@@ -85,7 +85,7 @@ void LE_SOLVER::step(state_type &y, double &xi, double &dxi)
         }
         else{
             double factor = 2.;
-            int max_steps = 10000;
+            int max_steps = 100000;
             double y0 = y[0];
             int counter = 0;
             double dx = dxi;

@@ -71,9 +71,16 @@ write_bkg.precision(16);
 write_bkg<<sp.n<<"\t"
 <<sp.b<<"\t"
 <<muf<<"\t"
+<<muf*pow(sp.b,(3.-sp.n)/2.)<<"\t"
 <<xi1_true<<"\t"
+<<xi1_true*pow(sp.b, (1-sp.n)/2.)<<"\t"
 <<Ca<<endl;
 write_bkg.close();
+
+if(sp.solve_tides==0)
+{
+ std::exit(0);
+}
 
 // /*-----------------------------------------------------------*/
 double dens_avg = 0.;
@@ -97,8 +104,8 @@ if(sp.solve_visc)
 // /*-----------------------------------------------------------*/
 int divisions = sp.div_Omega;
 assert(sp.Omegahigh>sp.Omegalow);
-double deltaomega = (sp.Omegahigh - sp.Omegalow)/(divisions-1);
-for(int i=0; i<divisions; ++i)
+double deltaomega = (sp.Omegahigh - sp.Omegalow)/(divisions);
+for(int i=0; i<divisions+1; ++i)
 {  
   cout<<"Start Run"<<endl;
   cout<<"===================="<<endl;
