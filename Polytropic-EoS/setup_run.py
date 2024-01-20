@@ -32,7 +32,9 @@ def get_input_array_from_b(n,N1,barr):
     input_data = np.array(input_data)
     return input_data
 #===============================================================================
-input_data = get_input_array_from_b(0.75,0.75, [0.59])
+input_data = get_input_array_from_b(1.0,0.75, [0.0054320988, 0.1358024691, 
+0.2661728395,
+0.347654321 ])
 #===============================================================================
 sim = Sim()
 sim.output_bvals = 0
@@ -43,11 +45,11 @@ sim.xil = 0.05
 sim.N_interp_LE = 5000
 sim.N_write = 99
 sim.steps_num = 5
-sim.factor_match = 0.8
+sim.factor_match = 0.7
 #----------------------
-sim.Omegalow = 0.3
-sim.Omegahigh = 0.4
-sim.div_Omega = 100
+sim.Omegalow = 0.06
+sim.Omegahigh = 0.16
+sim.div_Omega = 1000
 sim.out_dir = out_path + "/Runs"
 sim.animscript = home_path + "/plot-vals.ipynb"
 sim.setup_script = home_path + "/setup_run.py"
