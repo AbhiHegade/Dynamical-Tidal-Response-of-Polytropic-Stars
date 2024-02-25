@@ -141,6 +141,7 @@ for(int i=0; i<divisions+1; ++i)
     pf.solve_and_iterate_and_write(N_write, sp.steps_num, dr_internal, 
       sp.xil, sp.factor_match*(sp.xil + xi1_true), xi1guess, 
       k2, H0_v, W0_v, V_v, H1_v, xi_v, vals_origin, normk2);
+    
     if(sp.write_vec)
     {
       write_vec(path + "/", H0_v, "H0" );
