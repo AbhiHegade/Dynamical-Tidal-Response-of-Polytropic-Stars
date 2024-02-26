@@ -5,5 +5,6 @@ The code is based on the paper:
 
 # Description of the Mathematica Notebooks
 
-The repository contains a number of Mathematica notebooks. 
+The repository contains a number of Mathematica notebooks.
+
 The notebook supplementary_funcs.nb contains the expressions for the supplementary functions defined in the paper.
