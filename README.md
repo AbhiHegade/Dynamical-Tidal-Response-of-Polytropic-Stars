@@ -7,4 +7,4 @@ The code is based on the paper:
 
 The repository contains a number of Mathematica notebooks.
 
-The notebook supplementary_funcs.nb contains the expressions for the supplementary functions defined in the paper.
+The notebook $$\texttt{supplementary\_funcs.nb}$$ contains the expressions for the supplementary functions defined in the paper.
