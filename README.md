@@ -16,5 +16,8 @@ The C++ code provided in the folder Polytropic-EoS can be used to study the dyna
 To install the code you need to install the C++ package [brew](https://formulae.brew.sh/formula/boost) and download the eigen-3.4.0 package from [here](https://eigen.tuxfamily.org/index.php?title=Main_Page).
 
 After installing the above packages please change the BOOST_ROOT line and the EIGEN_ROOT line in the Makefile. 
-Once this is set the code should be ready to install using make.
+Once this is set the code should be ready to install. Type 
+```
+make
+```
 To run the code type ./setup_run.py .
