@@ -20,4 +20,9 @@ Once this is set the code should be ready to install. Type
 ```
 make
 ```
-To run the code type ./setup_run.py .
+in the command line. The make file should compile without any errors.
+
+To run the code type 
+```
+setup_run.py 
+```
