@@ -9,7 +9,7 @@ SYSLIB= -lm
 BOOST_ROOT= /opt/homebrew/Cellar/boost/1.82.0_1
 BOOST_INC= ${BOOST_ROOT}/include
 
-EIGEN_ROOT= /Users/abhi/Work/Projects/BDNK-Critical-Collapse/eigen-3.4.0
+EIGEN_ROOT= $(TOP)/eigen-3.4.0
 
 VPATH= $(SRC)
 #=============================================================================
