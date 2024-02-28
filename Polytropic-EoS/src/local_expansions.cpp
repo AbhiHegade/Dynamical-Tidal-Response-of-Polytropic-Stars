@@ -220,6 +220,35 @@ void obtain_H0_and_H1_ext(double l, double Omega, double n, double brel, double 
 //     ;
     
 //     H1_ext[1] *= dzdxi;
+
+/*----------------------------------------*/
+//Wrong Choice
+/*----------------------------------------*/
+//     H0_ext[0] = 
+//     z + (pow(epsilon,2)*(177 - 4500*z - 6490*pow(z,2) + 420*pow(Pi,2)*pow(z,2) + 22522*pow(z,3) - 840*pow(Pi,2)*pow(z,3) - 12579*pow(z,4) + 420*pow(Pi,2)*pow(z,4) + 210*pow(z,5) - 2520*pow(-1 + z,2)*pow(z,2)*Li_2 + 6*pow(-1 + z,2)*(-35 + 280*z + 214*pow(z,2) - 280*pow(z,3) + 35*pow(z,4))*log(1 - z) + 210*log(z) - 2100*z*log(z) + 2286*pow(z,2)*log(z) + 2568*pow(z,3)*log(z) - 4854*pow(z,4)*log(z) + 2100*pow(z,5)*log(z) - 210*pow(z,6)*log(z) - 1260*pow(z,2)*pow(log(z),2) + 2520*pow(z,3)*pow(log(z),2) - 1260*pow(z,4)*pow(log(z),2)))/(630.*pow(-1 + z,2)*z)
+//     ;
+    
+// //------------------
+//     H1_ext[0] = 
+//     1 + (pow(epsilon,2)*(-33 + 1569*z + 13204*pow(z,2) - 420*pow(Pi,2)*pow(z,2) - 41122*pow(z,3) + 1260*pow(Pi,2)*pow(z,3) + 42591*pow(z,4) - 1260*pow(Pi,2)*pow(z,4) - 15519*pow(z,5) + 420*pow(Pi,2)*pow(z,5) + 630*pow(z,6) - 2520*pow(-1 + z,3)*pow(z,2)*Li_2 + 6*pow(-1 + z,3)*(35 + 634*pow(z,2) - 560*pow(z,3) + 105*pow(z,4))*log(1 - z) + 210*log(z) - 630*z*log(z) + 4434*pow(z,2)*log(z) - 14982*pow(z,3)*log(z) + 22122*pow(z,4)*log(z) - 15774*pow(z,5)*log(z) + 5250*pow(z,6)*log(z) - 630*pow(z,7)*log(z) + 1260*pow(z,2)*pow(log(z),2) - 3780*pow(z,3)*pow(log(z),2) + 3780*pow(z,4)*pow(log(z),2) - 1260*pow(z,5)*pow(log(z),2)))/(630.*pow(-1 + z,3)*pow(z,2))
+//     ;
+
+
+//     H1_ext[0] *= dzdxi;
+
+// //------------------
+
+//     H0_ext[1] = (-5*(-1 + 8*z - 8*pow(z,3) + pow(z,4) + 12*pow(z,2)*log(z)))/(32.*pow(C1,5)*z) + (pow(epsilon,2)*(3871 - 105*pow(Pi,2) - 19501*z + 1050*pow(Pi,2)*z + 26454*pow(z,2) - 501*pow(Pi,2)*pow(z,2) + 12950*pow(z,3) - 2568*pow(Pi,2)*pow(z,3) - 47279*pow(z,4) + 3069*pow(Pi,2)*pow(z,4) + 26151*pow(z,5) - 1050*pow(Pi,2)*pow(z,5) - 2646*pow(z,6) + 105*pow(Pi,2)*pow(z,6) + 15120*pow(z,2)*zeta_3 - 30240*pow(z,3)*zeta_3 + 15120*pow(z,4)*zeta_3 - 15120*pow(-1 + z,2)*pow(z,2)*Li_3 - 321*log(1 - z) + 3210*z*log(1 - z) - 5457*pow(z,2)*log(1 - z) + 5457*pow(z,4)*log(1 - z) - 3210*pow(z,5)*log(1 - z) + 321*pow(z,6)*log(1 - z) - 210*log(z) + 10290*z*log(z) - 38577*pow(z,2)*log(z) + 1260*pow(Pi,2)*pow(z,2)*log(z) + 59442*pow(z,3)*log(z) - 2520*pow(Pi,2)*pow(z,3)*log(z) - 31224*pow(z,4)*log(z) + 1260*pow(Pi,2)*pow(z,4)*log(z) + 2580*pow(z,5)*log(z) - 321*pow(z,6)*log(z) + 630*log(1 - z)*log(z) - 6300*z*log(1 - z)*log(z) + 6858*pow(z,2)*log(1 - z)*log(z) + 7704*pow(z,3)*log(1 - z)*log(z) - 14562*pow(z,4)*log(1 - z)*log(z) + 6300*pow(z,5)*log(1 - z)*log(z) - 630*pow(z,6)*log(1 - z)*log(z) - 315*pow(log(z),2) + 3150*z*pow(log(z),2) - 5355*pow(z,2)*pow(log(z),2) + 5355*pow(z,4)*pow(log(z),2) - 3150*pow(z,5)*pow(log(z),2) + 315*pow(z,6)*pow(log(z),2) + 1260*pow(z,2)*pow(log(z),3) - 2520*pow(z,3)*pow(log(z),3) + 1260*pow(z,4)*pow(log(z),3) - 18*pow(-1 + z,2)*Li_2*(-35 + 280*z + 428*pow(z,2) - 280*pow(z,3) + 35*pow(z,4) - 420*pow(z,2)*log(z))))/(1008.*pow(C1,5)*pow(-1 + z,2)*z)
+//     ;
+    
+
+    
+//  //------------------
+
+//     H1_ext[1] = 
+//     (-5*(1 + 12*pow(z,2) - 16*pow(z,3) + 3*pow(z,4) + 12*pow(z,2)*log(z)))/(32.*pow(C1,5)*pow(z,2)) - (pow(epsilon,2)*(-4081 + 105*pow(Pi,2) + 22434*z - 315*pow(Pi,2)*z - 64625*pow(z,2) + 2859*pow(Pi,2)*pow(z,2) + 155830*pow(z,3) - 9417*pow(Pi,2)*pow(z,3) - 232503*pow(z,4) + 12987*pow(Pi,2)*pow(z,4) + 180230*pow(z,5) - 8529*pow(Pi,2)*pow(z,5) - 65223*pow(z,6) + 2625*pow(Pi,2)*pow(z,6) + 7938*pow(z,7) - 315*pow(Pi,2)*pow(z,7) + 15120*pow(z,2)*zeta_3 - 45360*pow(z,3)*zeta_3 + 45360*pow(z,4)*zeta_3 - 15120*pow(z,5)*zeta_3 + 15120*pow(-1 + z,3)*pow(z,2)*Li_3 + 321*log(1 - z) - 963*z*log(1 - z) + 4815*pow(z,2)*log(1 - z) - 17013*pow(z,3)*log(1 - z) + 27927*pow(z,4)*log(1 - z) - 22149*pow(z,5)*log(1 - z) + 8025*pow(z,6)*log(1 - z) - 963*pow(z,7)*log(1 - z) - 420*log(z) + 5670*z*log(z) - 28707*pow(z,2)*log(z) + 1260*pow(Pi,2)*pow(z,2)*log(z) + 84159*pow(z,3)*log(z) - 3780*pow(Pi,2)*pow(z,3)*log(z) - 90666*pow(z,4)*log(z) + 3780*pow(Pi,2)*pow(z,4)*log(z) + 39096*pow(z,5)*log(z) - 1260*pow(Pi,2)*pow(z,5)*log(z) - 6135*pow(z,6)*log(z) + 963*pow(z,7)*log(z) - 630*log(1 - z)*log(z) + 1890*z*log(1 - z)*log(z) - 13302*pow(z,2)*log(1 - z)*log(z) + 44946*pow(z,3)*log(1 - z)*log(z) - 66366*pow(z,4)*log(1 - z)*log(z) + 47322*pow(z,5)*log(1 - z)*log(z) - 15750*pow(z,6)*log(1 - z)*log(z) + 1890*pow(z,7)*log(1 - z)*log(z) + 315*pow(log(z),2) - 945*z*pow(log(z),2) + 4725*pow(z,2)*pow(log(z),2) - 16695*pow(z,3)*pow(log(z),2) + 27405*pow(z,4)*pow(log(z),2) - 21735*pow(z,5)*pow(log(z),2) + 7875*pow(z,6)*pow(log(z),2) - 945*pow(z,7)*pow(log(z),2) + 1260*pow(z,2)*pow(log(z),3) - 3780*pow(z,3)*pow(log(z),3) + 3780*pow(z,4)*pow(log(z),3) - 1260*pow(z,5)*pow(log(z),3) + 18*pow(-1 + z,3)*Li_2*(35 + 848*pow(z,2) - 560*pow(z,3) + 105*pow(z,4) - 420*pow(z,2)*log(z))))/(1008.*pow(C1,5)*pow(-1 + z,3)*pow(z,2))
+//     ;
+//     H1_ext[1] *= dzdxi;
     
 }
 //==========================================================
