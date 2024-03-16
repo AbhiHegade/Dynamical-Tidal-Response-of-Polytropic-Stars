@@ -2,7 +2,7 @@
 
 This repository contains a code to analyze the dynamical tidal response of polytropic stars in general relativity.
 The code is based on the paper [Dynamical tidal response of non-rotating relativistic stars](https://arxiv.org/abs/2403.03254). If you use this code please use the citation
-'''
+```
 @article{HegadeKR:2024agt,
     author = "Hegade K. R., Abhishek and Ripley, Justin L. and Yunes, Nicol\'as",
     title = "{Dynamical tidal response of non-rotating relativistic stars}",
@@ -13,7 +13,7 @@ The code is based on the paper [Dynamical tidal response of non-rotating relativ
     year = "2024"
 }
 }
-'''
+```
 
 ## Description of the Mathematica Notebooks
 
