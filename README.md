@@ -12,7 +12,6 @@ The code is based on the paper [Dynamical tidal response of non-rotating relativ
     month = "3",
     year = "2024"
 }
-}
 ```
 
 ## Description of the Mathematica Notebooks
