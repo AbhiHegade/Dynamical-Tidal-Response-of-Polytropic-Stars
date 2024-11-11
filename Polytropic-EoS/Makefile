@@ -6,7 +6,7 @@ OUT= $(TOP)output/
 
 SYSLIB= -lm
 
-BOOST_ROOT= /opt/homebrew/Cellar/boost/1.82.0_1
+BOOST_ROOT=/opt/homebrew/Cellar/boost/1.86.0
 BOOST_INC= ${BOOST_ROOT}/include
 
 EIGEN_ROOT= YOUR_EIGEN_PATH
